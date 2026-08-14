@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0.0",
+  "stage": "0000",
+  "status": "COLLECTING",
+  "generatedAt": null,
+  "targetDate": null,
+  "sourceSite": { "baseUrl": "https://tw-stock-dashboard.netlify.app", "endpoints": { "health": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-data-health", "marketData": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-data", "snapshot": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-snapshot" } },
+  "marketHealth": { "available": false, "status": "not_collected", "checkedAt": null, "components": {} },
+  "spot": { "0050": { "available": false, "price": null }, "2330": { "available": false, "price": null }, "TAIEX": { "available": false, "price": null }, "00631L": { "available": false, "price": null } },
+  "overnight": { "TSM": { "available": false, "price": null }, "SOX": { "available": false, "price": null }, "QQQ_NASDAQ": { "available": false, "price": null }, "NVDA": { "available": false, "price": null }, "MU": { "available": false, "price": null }, "USD_TWD": { "available": false, "price": null }, "VIX": { "available": false, "price": null } },
+  "futures": { "TX_DIRECTION": { "available": false, "price": null, "contractMonth": null, "quoteType": "continuous_nearby_direction" }, "TX_FRONT_MONTH": { "available": false, "price": null, "contractMonth": null, "quoteType": "explicit_contract_live" } },
+  "intraday": { "firstHour": null, "intradayWindow": null, "samples": [] },
+  "freshnessSummary": { "basis": "sourceAt_or_updatedAt_only", "fetchedAtIsFreshnessEvidence": false, "counts": { "fresh": 0, "stale": 0, "missing": 0, "invalid": 0 } },
+  "missingRequired": ["initial_collection_pending"],
+  "errors": []
+}

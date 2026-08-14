@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "stage": "0000",
+  "status": "COLLECTING",
+  "generatedAt": null,
+  "targetDate": null,
+  "sourceSite": {
+    "baseUrl": "https://tw-stock-dashboard.netlify.app",
+    "endpoints": {
+      "health": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-data-health",
+      "marketData": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-data",
+      "snapshot": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-snapshot"
+    }
+  },
+  "marketHealth": { "available": false, "status": "not_collected", "checkedAt": null, "components": {} },
+  "spot": {
+    "0050": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "2330": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "TAIEX": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "00631L": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" }
+  },
+  "overnight": {
+    "TSM": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "SOX": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "QQQ_NASDAQ": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "NVDA": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "MU": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "USD_TWD": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" },
+    "VIX": { "available": false, "price": null, "sourceAt": null, "reason": "not_collected" }
+  },
+  "futures": {
+    "TX_DIRECTION": { "available": false, "price": null, "contractMonth": null, "quoteType": "continuous_nearby_direction", "reason": "not_collected" },
+    "TX_FRONT_MONTH": { "available": false, "price": null, "contractMonth": null, "quoteType": "explicit_contract_live", "reason": "not_collected" }
+  },
+  "intraday": { "firstHour": null, "intradayWindow": null, "samples": [] },
+  "freshnessSummary": { "basis": "sourceAt_or_updatedAt_only", "fetchedAtIsFreshnessEvidence": false, "counts": { "fresh": 0, "stale": 0, "missing": 0, "invalid": 0 } },
+  "missingRequired": ["initial_collection_pending"],
+  "errors": []
+}
