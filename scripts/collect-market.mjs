@@ -381,9 +381,13 @@ function determineStatus(stage, data, fetchErrors, testMode) {
         missingRequired.push(`spot.${symbol}.current_last_trade`);
       }
     }
-    if (!data.spot["00631L"]?.available) missingOptional.push("spot.00631L");
-    if (!data.intraday.firstHour) missingOptional.push("intraday.firstHour");
-    if (!data.intraday.intradayWindow) missingOptional.push("intraday.intradayWindow");
+    const optionalSpot = data.spot["00631L"];
+    if (optionalSpot?.price === null || optionalSpot?.freshness?.status !== "fresh" || !sourceDateMatches(optionalSpot, data.targetDate)) {
+      missingOptional.push("spot.00631L.current_last_trade");
+    }
+    const intradayDateMatches = data.intraday.intradayWindow?.tradingDate === data.targetDate;
+    if (!data.intraday.firstHour || !intradayDateMatches) missingOptional.push("intraday.firstHour.current_target_date");
+    if (!data.intraday.intradayWindow || !intradayDateMatches) missingOptional.push("intraday.intradayWindow.current_target_date");
   } else if (stage === "0850") {
     for (const symbol of CORE_SPOT) {
       const quote = data.spot[symbol];
