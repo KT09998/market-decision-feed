@@ -42,6 +42,10 @@ const MAX_PAYLOAD_BYTES = 64 * 1024;
 const CORE_SPOT = ["0050", "2330", "TAIEX"];
 const SPOT_SYMBOLS = [...CORE_SPOT, "00631L"];
 const OVERNIGHT_SYMBOLS = ["TSM", "SOX", "QQQ_NASDAQ", "NVDA", "MU", "USD_TWD", "VIX"];
+const STAGE_NOT_BEFORE = { "0000": "00:00:00", "0850": "08:50:00", "1030": "10:30:00" };
+const CLOCK_SKEW_TOLERANCE_SECONDS = 5;
+const MIDNIGHT_FRESH_SECONDS = 15 * 60;
+const MIDNIGHT_DELAYED_SECONDS = 30 * 60;
 
 function parseArgs(argv) {
   const options = { stage: null, testMode: false, selfTest: false, force: false };
@@ -102,18 +106,74 @@ function targetDateFor(stage, now) {
   return stage === "0000" && Number(parts.hour) >= 20 ? addUtcDays(today, 1) : today;
 }
 
+function stageNotBefore(stage, targetDate) {
+  const time = STAGE_NOT_BEFORE[stage];
+  return time && targetDate ? new Date(targetDate + "T" + time + "+08:00") : null;
+}
+
+function stageWindowOpen(stage, targetDate, at) {
+  const gate = stageNotBefore(stage, targetDate);
+  return gate !== null && Number.isFinite(gate.getTime()) && at instanceof Date && Number.isFinite(at.getTime()) && at.getTime() >= gate.getTime();
+}
+
 function sourceTimestamp(value) {
   return value?.freshness?.sourceAt ?? value?.sourceAt ?? value?.updatedAt ?? null;
 }
+
 
 function assessFreshness(sourceAt, now, maxAgeSeconds) {
   if (!sourceAt) return { status: "missing", sourceAt: null, ageSeconds: null, maxAgeSeconds, basis: "sourceAt_or_updatedAt" };
   const sourceMs = Date.parse(sourceAt);
   if (!Number.isFinite(sourceMs)) return { status: "invalid", sourceAt, ageSeconds: null, maxAgeSeconds, basis: "sourceAt_or_updatedAt" };
-  const ageSeconds = Math.round((now.getTime() - sourceMs) / 1000);
-  const status = ageSeconds < -300 ? "invalid" : ageSeconds <= maxAgeSeconds ? "fresh" : "stale";
-  return { status, sourceAt: new Date(sourceMs).toISOString(), ageSeconds, maxAgeSeconds, basis: "sourceAt_or_updatedAt" };
+  const rawAgeSeconds = Math.round((now.getTime() - sourceMs) / 1000);
+  const clockSkewClamped = rawAgeSeconds < 0 && rawAgeSeconds >= -CLOCK_SKEW_TOLERANCE_SECONDS;
+  const ageSeconds = clockSkewClamped ? 0 : rawAgeSeconds < 0 ? null : rawAgeSeconds;
+  const status = rawAgeSeconds < -CLOCK_SKEW_TOLERANCE_SECONDS ? "invalid" : ageSeconds <= maxAgeSeconds ? "fresh" : "stale";
+  return { status, sourceAt: new Date(sourceMs).toISOString(), ageSeconds, rawAgeSeconds, clockSkewClamped, maxAgeSeconds, basis: "sourceAt_or_updatedAt" };
 }
+
+function isCompletedSessionQuote(value) {
+  if (value?.completedSession === true || value?.completed_session === true) return true;
+  const quoteType = String(value?.quoteType ?? "").toLowerCase();
+  if (["official_close", "completed_session_close", "regular_market_close"].includes(quoteType)) return true;
+  const states = [value?.session, value?.sessionStatus, value?.marketState, value?.marketStatus]
+    .map((state) => String(state ?? "").toLowerCase());
+  return states.some((state) => ["closed", "completed", "complete"].includes(state));
+}
+
+function isUsEquityActive(now) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now).map(({ type, value }) => [type, value]));
+  const weekday = parts.weekday;
+  const minutes = Number(parts.hour) * 60 + Number(parts.minute);
+  return !["Sat", "Sun"].includes(weekday) && minutes >= 9 * 60 + 30 && minutes < 16 * 60;
+}
+
+function assessMidnightFreshness(value, now) {
+  const base = assessFreshness(sourceTimestamp(value), now, MIDNIGHT_FRESH_SECONDS);
+  const activeSession = isUsEquityActive(now);
+  if (base.status === "missing" || base.status === "invalid") {
+    return { ...base, classification: base.status, quality: "blocked", activeSession };
+  }
+  if (isCompletedSessionQuote(value)) {
+    return { ...base, status: "completed-session", classification: "completed-session", quality: "standard", activeSession: false };
+  }
+  const ageSeconds = base.rawAgeSeconds ?? base.ageSeconds;
+  if (ageSeconds <= MIDNIGHT_FRESH_SECONDS) {
+    return { ...base, status: "fresh", classification: "fresh", quality: "standard", activeSession };
+  }
+  if (ageSeconds <= MIDNIGHT_DELAYED_SECONDS) {
+    return { ...base, status: "delayed", classification: "delayed", quality: "downgraded", activeSession };
+  }
+  return { ...base, status: "stale", classification: "stale", quality: activeSession ? "blocked" : "downgraded", activeSession };
+}
+
+
 
 function unavailable(reason) {
   return {
@@ -176,6 +236,7 @@ function normalizeSpot(symbol, snapshot, marketQuotes, stage, now) {
   };
 }
 
+
 function normalizeOvernight(symbol, marketQuotes, now) {
   const candidates = symbol === "QQQ_NASDAQ" ? ["QQQ", "NASDAQ", "IXIC"] : symbol === "USD_TWD" ? ["USD_TWD", "USDTWD", "TWD=X"] : [symbol];
   const quote = candidates.map((candidate) => marketQuotes.get(candidate)).find(Boolean);
@@ -191,9 +252,14 @@ function normalizeOvernight(symbol, marketQuotes, now) {
     source: quote.source ?? null,
     sourceSymbol: quote.sourceSymbol ?? null,
     quoteType: "regular_market_quote",
+    completedSession: isCompletedSessionQuote(quote),
+    session: quote.session ?? quote.sessionStatus ?? null,
+    marketState: quote.marketState ?? quote.marketStatus ?? null,
     freshness,
   };
 }
+
+
 
 function normalizeDirection(marketQuotes, now) {
   const quote = marketQuotes.get("TX_DIRECTION") ?? marketQuotes.get("TX_NIGHT");
@@ -274,7 +340,12 @@ function compactFirstHour(firstHour) {
       precision: value.precision ?? null,
     };
   }
-  return { frozenAt: firstHour.frozenAt ?? null, through: firstHour.through ?? null, symbols };
+  return {
+    tradingDate: firstHour.tradingDate ?? null,
+    frozenAt: firstHour.frozenAt ?? null,
+    through: firstHour.through ?? null,
+    symbols,
+  };
 }
 
 function compactSamples(samples) {
@@ -364,52 +435,103 @@ function freshnessSummary(data, testMode) {
   };
 }
 
+
 function sourceDateMatches(value, targetDate) {
   const sourceAt = value?.freshness?.sourceAt;
-  return sourceAt ? dateInTaipei(new Date(sourceAt)) === targetDate : false;
+  if (!sourceAt) return false;
+  const date = new Date(sourceAt);
+  return Number.isFinite(date.getTime()) && dateInTaipei(date) === targetDate;
 }
 
-function determineStatus(stage, data, fetchErrors, testMode) {
+function midnightGate(data, now) {
+  const missingRequired = [];
+  const qualityReasons = [];
+  const tsm = assessMidnightFreshness(data.overnight.TSM, now);
+  const broad = data.overnight.SOX?.available ? assessMidnightFreshness(data.overnight.SOX, now) : assessMidnightFreshness(data.overnight.QQQ_NASDAQ, now);
+  if (!data.overnight.TSM?.available) {
+    missingRequired.push("overnight.TSM.available");
+  } else if (!["fresh", "delayed", "completed-session"].includes(tsm.status) && !(tsm.status === "stale" && !tsm.activeSession)) {
+    missingRequired.push("overnight.TSM.current_or_completed_session");
+  }
+  if (!data.overnight.SOX?.available && !data.overnight.QQQ_NASDAQ?.available) {
+    missingRequired.push("overnight.SOX_or_QQQ_NASDAQ.available");
+  } else if (!["fresh", "delayed", "completed-session"].includes(broad.status) && !(broad.status === "stale" && !broad.activeSession)) {
+    missingRequired.push("overnight.SOX_or_QQQ_NASDAQ.current_or_completed_session");
+  }
+  for (const [name, assessment] of [["TSM", tsm], ["SOX_or_QQQ_NASDAQ", broad]]) {
+    if (assessment.quality === "downgraded") qualityReasons.push("overnight." + name + "." + assessment.classification);
+    if (assessment.quality === "blocked") qualityReasons.push("overnight." + name + ".blocked");
+  }
+  return { missingRequired, qualityReasons, assessments: { TSM: tsm, SOX_or_QQQ_NASDAQ: broad } };
+}
+
+function determineStatus(stage, data, fetchErrors, testMode, now = new Date(data.generatedAt ?? Date.now())) {
   const missingRequired = [];
   const missingOptional = [];
+  const qualityReasons = [];
+  const stageOpen = stageWindowOpen(stage, data.targetDate, now);
+  if (!stageOpen) missingRequired.push("stage." + stage + ".not_before");
   if (!data.marketHealth.available) missingOptional.push("marketHealth");
 
   if (stage === "1030") {
     for (const symbol of CORE_SPOT) {
       const quote = data.spot[symbol];
       if (quote?.price === null || quote?.priceKind !== "last_trade" || quote?.freshness?.status !== "fresh" || !sourceDateMatches(quote, data.targetDate)) {
-        missingRequired.push(`spot.${symbol}.current_last_trade`);
+        missingRequired.push("spot." + symbol + ".current_last_trade");
       }
     }
     const optionalSpot = data.spot["00631L"];
     if (optionalSpot?.price === null || optionalSpot?.freshness?.status !== "fresh" || !sourceDateMatches(optionalSpot, data.targetDate)) {
       missingOptional.push("spot.00631L.current_last_trade");
     }
-    const intradayDateMatches = data.intraday.intradayWindow?.tradingDate === data.targetDate;
-    if (!data.intraday.firstHour || !intradayDateMatches) missingOptional.push("intraday.firstHour.current_target_date");
-    if (!data.intraday.intradayWindow || !intradayDateMatches) missingOptional.push("intraday.intradayWindow.current_target_date");
+    const firstHour = data.intraday.firstHour;
+    const firstHourThrough = firstHour?.through ? new Date(firstHour.through) : null;
+    const firstHourDate = firstHour?.tradingDate ?? (firstHourThrough && Number.isFinite(firstHourThrough.getTime()) ? dateInTaipei(firstHourThrough) : null);
+    if (!firstHour || firstHourDate !== data.targetDate) {
+      missingRequired.push("intraday.firstHour.current_target_date");
+    } else {
+      for (const symbol of CORE_SPOT) if (!firstHour.symbols?.[symbol]) missingRequired.push("intraday.firstHour." + symbol);
+    }
+    const window = data.intraday.intradayWindow;
+    if (!window || window.tradingDate !== data.targetDate) {
+      missingRequired.push("intraday.intradayWindow.current_target_date");
+    } else if (!Number.isFinite(window.sampleCount) || window.sampleCount < 1) {
+      missingRequired.push("intraday.intradayWindow.samples");
+    } else {
+      const currentSamples = (data.intraday.samples ?? []).filter((sample) => {
+        const sampleDate = sample?.at ? new Date(sample.at) : null;
+        return sampleDate && Number.isFinite(sampleDate.getTime()) && dateInTaipei(sampleDate) === data.targetDate;
+      });
+      const sampleSymbols = new Set();
+      for (const sample of currentSamples) for (const symbol of CORE_SPOT) if (sample?.quotes?.[symbol]) sampleSymbols.add(symbol);
+      for (const symbol of CORE_SPOT) if (!sampleSymbols.has(symbol)) missingRequired.push("intraday.intradayWindow.samples." + symbol);
+    }
   } else if (stage === "0850") {
     for (const symbol of CORE_SPOT) {
       const quote = data.spot[symbol];
       const hasObservation = quote?.available && quote?.freshness?.status === "fresh" && sourceDateMatches(quote, data.targetDate);
-      if (!hasObservation) missingRequired.push(`spot.${symbol}.current_preopen_observation`);
-      if (quote?.actualOpen !== null) missingRequired.push(`spot.${symbol}.actualOpen_must_be_null_at_0850`);
+      if (!hasObservation) missingRequired.push("spot." + symbol + ".current_preopen_observation");
+      if (quote?.actualOpen !== null) missingRequired.push("spot." + symbol + ".actualOpen_must_be_null_at_0850");
     }
   } else {
-    if (!data.overnight.TSM?.available) missingRequired.push("overnight.TSM");
-    if (!data.overnight.SOX?.available && !data.overnight.QQQ_NASDAQ?.available) missingRequired.push("overnight.SOX_or_QQQ_NASDAQ");
+    const midnight = midnightGate(data, now);
+    missingRequired.push(...midnight.missingRequired);
+    qualityReasons.push(...midnight.qualityReasons);
   }
 
   if (!data.futures.TX_DIRECTION.available) missingOptional.push("futures.TX_DIRECTION");
   if (!data.futures.TX_FRONT_MONTH.available) missingOptional.push("futures.TX_FRONT_MONTH");
-
   let status;
   if (fetchErrors.length >= 3) status = "ERROR";
   else if (testMode) status = fetchErrors.length ? "DEGRADED" : "COLLECTING";
+  else if (!stageOpen) status = "COLLECTING";
   else if (missingRequired.length === 0) status = "READY";
   else status = "DEGRADED";
-  return { status, missingRequired, missingOptional };
+  const quality = qualityReasons.length ? "downgraded" : missingRequired.length ? (stageOpen ? "degraded" : "warmup") : "standard";
+  return { status, missingRequired, missingOptional, quality, qualityReasons };
 }
+
+
 
 function findSensitiveKeys(value, pathParts = [], found = []) {
   if (Array.isArray(value)) {
@@ -466,7 +588,15 @@ async function readJsonIfPresent(filePath) {
 }
 
 function isReasonableReady(payload, stage, targetDate) {
-  return payload?.status === "READY" && payload?.stage === stage && payload?.targetDate === targetDate && REQUIRED_KEYS.every((key) => key in payload);
+  const asOf = payload?.generatedAt ?? payload?.asOf;
+  const generatedAt = asOf ? new Date(asOf) : null;
+  return payload?.status === "READY" &&
+    payload?.stage === stage &&
+    payload?.targetDate === targetDate &&
+    REQUIRED_KEYS.every((key) => key in payload) &&
+    generatedAt !== null &&
+    Number.isFinite(generatedAt.getTime()) &&
+    stageWindowOpen(stage, targetDate, generatedAt);
 }
 
 async function buildPayload(stage, testMode, now = new Date()) {
@@ -497,10 +627,12 @@ async function buildPayload(stage, testMode, now = new Date()) {
     collection: { testMode, latestUpdated: false, sourceSchemas: { health: responses.health.data?.status ?? null, marketData: marketData?.schemaVersion ?? null, snapshot: snapshot?.schemaVersion ?? null } },
   };
   data.freshnessSummary = freshnessSummary(data, testMode);
-  const decision = determineStatus(stage, data, fetchErrors, testMode);
+  const decision = determineStatus(stage, data, fetchErrors, testMode, now);
   data.status = decision.status;
   data.missingRequired = decision.missingRequired;
   data.missingOptional = decision.missingOptional;
+  data.freshnessSummary.quality = decision.quality;
+  data.freshnessSummary.qualityReasons = decision.qualityReasons;
   return data;
 }
 
@@ -515,7 +647,8 @@ async function writeCollection(payload, testMode) {
   let latestUpdated = false;
   if (!testMode) {
     const existing = await readJsonIfPresent(latestPath);
-    if (payload.status === "READY" || existing?.status !== "READY") {
+    const readyForLatest = payload.status === "READY" && stageWindowOpen(payload.stage, payload.targetDate, new Date(payload.generatedAt ?? 0));
+    if (readyForLatest || (payload.status !== "READY" && existing?.status !== "READY")) {
       const latest = structuredClone(payload);
       latest.collection.latestUpdated = true;
       const latestValidation = validatePayload(latest);
@@ -527,36 +660,96 @@ async function writeCollection(payload, testMode) {
   console.log(`RESULT stage=${payload.stage} status=${payload.status} targetDate=${payload.targetDate} testMode=${testMode} latestUpdated=${latestUpdated} statusBytes=${validation.bytes}`);
 }
 
+
 async function runSelfTest() {
   const failures = [];
+  const assert = (condition, message) => {
+    if (!condition) failures.push(message);
+  };
+  const makeFixture = (stage, now, options = {}) => {
+    const targetDate = targetDateFor(stage, now);
+    const freshAt = new Date(now.getTime() - 60_000).toISOString();
+    const spot = Object.fromEntries(SPOT_SYMBOLS.map((symbol) => [symbol, {
+      available: true, price: 100, priceKind: "last_trade",
+      actualOpen: stage === "0850" ? null : 100,
+      freshness: { status: "fresh", sourceAt: freshAt },
+    }]));
+    const firstHourSymbols = Object.fromEntries(CORE_SPOT.map((symbol) => [symbol, { open: 100, high: 101, low: 99, last: 100 }]));
+    const samples = [{ at: freshAt, quotes: Object.fromEntries(CORE_SPOT.map((symbol) => [symbol, { price: 100 }])) }];
+    const overnightAt = new Date(now.getTime() - (options.overnightAgeSeconds ?? 60) * 1000).toISOString();
+    const overnight = Object.fromEntries(["TSM", "SOX"].map((symbol) => [symbol, {
+      available: true, price: 100, sourceAt: overnightAt, source: "fixture",
+      quoteType: "regular_market_quote", completedSession: options.completedSession === true,
+      freshness: { status: "fresh", sourceAt: overnightAt },
+    }]));
+    overnight.QQQ_NASDAQ = { available: false, price: null, sourceAt: null, freshness: { status: "missing", sourceAt: null } };
+    const intraday = options.intradayMissing ? { firstHour: null, intradayWindow: null, samples: [] } : {
+      firstHour: { tradingDate: targetDate, through: targetDate + "T10:00:00+08:00", symbols: firstHourSymbols },
+      intradayWindow: { tradingDate: targetDate, sampleCount: 1 }, samples,
+    };
+    return {
+      schemaVersion: "1.0.0", stage, status: "COLLECTING", generatedAt: now.toISOString(), targetDate,
+      sourceSite: { baseUrl: "fixture", endpoints: {} }, marketHealth: { available: true },
+      spot, overnight, futures: { TX_DIRECTION: { available: true }, TX_FRONT_MONTH: { available: true } },
+      intraday, freshnessSummary: {}, missingRequired: [], errors: [],
+    };
+  };
   const now = new Date("2026-08-15T02:30:00.000Z");
-  if (assessFreshness("2020-01-01T00:00:00.000Z", now, 600).status !== "stale") failures.push("old sourceAt became fresh");
-  if (assessFreshness(null, now, 600).status !== "missing") failures.push("missing sourceAt did not stay missing");
-
+  assert(assessFreshness("2020-01-01T00:00:00.000Z", now, 600).status === "stale", "old sourceAt became fresh");
+  assert(assessFreshness(null, now, 600).status === "missing", "missing sourceAt did not stay missing");
+  const skew = assessFreshness(new Date(now.getTime() + 2_000).toISOString(), now, 1_800);
+  assert(skew.status === "fresh" && skew.ageSeconds === 0 && skew.clockSkewClamped === true, "small future clock skew was not clamped to zero");
+  assert(assessFreshness(new Date(now.getTime() + 301_000).toISOString(), now, 1_800).status === "invalid", "future source time over five minutes was accepted");
   const nearby = { quoteType: "continuous_nearby_direction", explicitContract: false, contractMonth: null, live: true, close: 20000, source: "continuous nearby", updatedAt: now.toISOString() };
-  if (validateFrontMonthQuote(nearby, now).valid) failures.push("continuous nearby became TX_FRONT_MONTH");
+  assert(!validateFrontMonthQuote(nearby, now).valid, "continuous nearby became TX_FRONT_MONTH");
   const daily = { quoteType: "explicit_contract_live", explicitContract: true, contractMonth: "202608", live: true, close: 20000, source: "TAIFEX DailyMarketReport", updatedAt: now.toISOString() };
-  if (validateFrontMonthQuote(daily, now).valid) failures.push("daily report became TX_FRONT_MONTH");
+  assert(!validateFrontMonthQuote(daily, now).valid, "daily report became TX_FRONT_MONTH");
   const bidAskOnly = { quoteType: "explicit_contract_live", explicitContract: true, contractMonth: "202608", live: true, close: null, bestBid: [19999], bestAsk: [20001], source: "live explicit contract", updatedAt: now.toISOString() };
   const bidAskResult = validateFrontMonthQuote(bidAskOnly, now);
-  if (!bidAskResult.valid || bidAskResult.price !== null || bidAskResult.bid !== 19999 || bidAskResult.ask !== 20001) failures.push("bid/ask-only quote was rejected or midpoint was fabricated");
-
-  const templateFiles = [...["0000", "0850", "1030"].flatMap((stage) => [`latest_${stage}.json`, `status_${stage}.json`])];
+  assert(bidAskResult.valid && bidAskResult.price === null && bidAskResult.bid === 19999 && bidAskResult.ask === 20001, "bid/ask-only quote was rejected or midpoint was fabricated");
+  const warm1030 = new Date("2026-08-15T02:27:00.000Z");
+  const ready1030 = new Date("2026-08-15T02:32:00.000Z");
+  assert(determineStatus("1030", makeFixture("1030", warm1030), [], false, warm1030).status === "COLLECTING", "10:27 was allowed to become READY");
+  assert(determineStatus("1030", makeFixture("1030", ready1030), [], false, ready1030).status === "READY", "10:32 did not pass the stage gate");
+  const warm0850 = new Date("2026-08-15T00:47:00.000Z");
+  const ready0850 = new Date("2026-08-15T00:52:00.000Z");
+  assert(determineStatus("0850", makeFixture("0850", warm0850), [], false, warm0850).status === "COLLECTING", "08:47 was allowed to become READY");
+  assert(determineStatus("0850", makeFixture("0850", ready0850), [], false, ready0850).status === "READY", "08:52 did not pass the stage gate");
+  const warm0000 = new Date("2026-08-14T15:57:00.000Z");
+  const ready0000 = new Date("2026-08-14T16:03:00.000Z");
+  assert(determineStatus("0000", makeFixture("0000", warm0000), [], false, warm0000).status === "COLLECTING", "23:57 was allowed to become READY");
+  assert(determineStatus("0000", makeFixture("0000", ready0000), [], false, ready0000).status === "READY", "00:03 did not pass the stage gate");
+  const preGateReady = makeFixture("1030", warm1030); preGateReady.status = "READY";
+  assert(!isReasonableReady(preGateReady, "1030", preGateReady.targetDate), "pre-gate generatedAt was accepted as READY");
+  const postGateReady = makeFixture("1030", ready1030); postGateReady.status = "READY";
+  assert(isReasonableReady(postGateReady, "1030", postGateReady.targetDate), "post-gate generatedAt was rejected as READY");
+  const staleMidnight = makeFixture("0000", ready0000, { overnightAgeSeconds: 31 * 60 });
+  const staleDecision = determineStatus("0000", staleMidnight, [], false, ready0000);
+  assert(staleDecision.status !== "READY" && staleDecision.missingRequired.some((item) => item.includes("overnight.TSM")), "stale TSM/SOX data became midnight READY");
+  const delayedMidnight = makeFixture("0000", ready0000, { overnightAgeSeconds: 20 * 60 });
+  const delayedDecision = determineStatus("0000", delayedMidnight, [], false, ready0000);
+  assert(delayedDecision.status === "READY" && delayedDecision.quality === "downgraded", "delayed midnight data did not produce downgraded READY quality");
+  const missingIntraday = makeFixture("1030", ready1030, { intradayMissing: true });
+  const missingIntradayDecision = determineStatus("1030", missingIntraday, [], false, ready1030);
+  assert(missingIntradayDecision.status !== "READY" && missingIntradayDecision.missingRequired.some((item) => item.startsWith("intraday.")), "1030 missing intraday core was accepted");
+  const no2330 = makeFixture("1030", ready1030);
+  delete no2330.intraday.firstHour.symbols["2330"]; delete no2330.intraday.samples[0].quotes["2330"];
+  const no2330Decision = determineStatus("1030", no2330, [], false, ready1030);
+  assert(no2330Decision.missingRequired.includes("intraday.firstHour.2330") && no2330Decision.missingRequired.includes("intraday.intradayWindow.samples.2330"), "missing 2330 intraday coverage was not recorded");
+  const templateFiles = [...["0000", "0850", "1030"].flatMap((stage) => ["latest_" + stage + ".json", "status_" + stage + ".json"])];
   for (const fileName of templateFiles) {
     const payload = await readJsonIfPresent(path.join(ROOT, fileName));
-    if (!payload) {
-      failures.push(`${fileName} missing`);
-      continue;
-    }
+    if (!payload) { failures.push(fileName + " missing"); continue; }
     const validation = validatePayload(payload);
-    failures.push(...validation.failures.map((failure) => `${fileName}: ${failure}`));
+    failures.push(...validation.failures.map((failure) => fileName + ": " + failure));
   }
-
   const sensitiveFixture = { safe: true, api_key: "must-be-detected" };
-  if (findSensitiveKeys(sensitiveFixture).length !== 1) failures.push("sensitive-key scanner failed");
-  if (failures.length) throw new Error(`Self-test failed:\n- ${failures.join("\n- ")}`);
-  console.log(`SELF_TEST_OK templates=${templateFiles.length} maxPayloadBytes=${MAX_PAYLOAD_BYTES}`);
+  assert(findSensitiveKeys(sensitiveFixture).length === 1, "sensitive-key scanner failed");
+  if (failures.length) throw new Error("Self-test failed:\n- " + failures.join("\n- "));
+  console.log("SELF_TEST_OK templates=" + templateFiles.length + " maxPayloadBytes=" + MAX_PAYLOAD_BYTES);
 }
+
+
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
