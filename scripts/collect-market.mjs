@@ -132,6 +132,12 @@ function assessFreshness(sourceAt, now, maxAgeSeconds) {
   return { status, sourceAt: new Date(sourceMs).toISOString(), ageSeconds, rawAgeSeconds, clockSkewClamped, maxAgeSeconds, basis: "sourceAt_or_updatedAt" };
 }
 
+function payloadCollectionStartedAt(payload, fallback = null) {
+  const value = payload?.collection?.startedAt ?? fallback ?? payload?.generatedAt ?? payload?.asOf;
+  const date = value ? new Date(value) : null;
+  return date && Number.isFinite(date.getTime()) ? date : null;
+}
+
 function isCompletedSessionQuote(value) {
   if (value?.completedSession === true || value?.completed_session === true) return true;
   const quoteType = String(value?.quoteType ?? "").toLowerCase();
@@ -196,7 +202,7 @@ function quoteMap(marketData) {
   return map;
 }
 
-function normalizeSpot(symbol, snapshot, marketQuotes, stage, now) {
+function normalizeSpot(symbol, snapshot, marketQuotes, stage, evaluatedAt) {
   const primary = snapshot?.quotes?.[symbol];
   const fallback = marketQuotes.get(symbol);
   const primaryIsTrade = isObject(primary) && positiveNumber(primary.price) !== null && primary.priceKind === "last_trade" && primary.isReferencePrice !== true;
@@ -212,7 +218,7 @@ function normalizeSpot(symbol, snapshot, marketQuotes, stage, now) {
   const indicativePrice = stage === "0850" && rawPrice !== null && !isActualTrade ? rawPrice : null;
   const sourceAt = sourceTimestamp(selected);
   const maxAgeSeconds = stage === "1030" ? 600 : stage === "0850" ? 1_200 : 129_600;
-  const freshness = assessFreshness(sourceAt, now, maxAgeSeconds);
+  const freshness = assessFreshness(sourceAt, evaluatedAt, maxAgeSeconds);
   const bid = compactArray(selected.bestBid)[0] ?? null;
   const ask = compactArray(selected.bestAsk)[0] ?? null;
 
@@ -237,13 +243,13 @@ function normalizeSpot(symbol, snapshot, marketQuotes, stage, now) {
 }
 
 
-function normalizeOvernight(symbol, marketQuotes, now) {
+function normalizeOvernight(symbol, marketQuotes, evaluatedAt) {
   const candidates = symbol === "QQQ_NASDAQ" ? ["QQQ", "NASDAQ", "IXIC"] : symbol === "USD_TWD" ? ["USD_TWD", "USDTWD", "TWD=X"] : [symbol];
   const quote = candidates.map((candidate) => marketQuotes.get(candidate)).find(Boolean);
   if (!quote) return unavailable("symbol_absent_from_market_data");
   const price = positiveNumber(quote.close ?? quote.price);
   const sourceAt = sourceTimestamp(quote);
-  const freshness = assessFreshness(sourceAt, now, 129_600);
+  const freshness = assessFreshness(sourceAt, evaluatedAt, 129_600);
   return {
     available: price !== null,
     price,
@@ -261,12 +267,12 @@ function normalizeOvernight(symbol, marketQuotes, now) {
 
 
 
-function normalizeDirection(marketQuotes, now) {
+function normalizeDirection(marketQuotes, evaluatedAt) {
   const quote = marketQuotes.get("TX_DIRECTION") ?? marketQuotes.get("TX_NIGHT");
   if (!quote) return { ...unavailable("continuous_nearby_absent"), quoteType: "continuous_nearby_direction", contractMonth: null };
   const validClass = quote.quoteType === "continuous_nearby_direction" && quote.explicitContract !== true && !quote.contractMonth;
   if (!validClass) return { ...unavailable("source_is_not_continuous_nearby_direction"), quoteType: "continuous_nearby_direction", contractMonth: null };
-  const freshness = assessFreshness(sourceTimestamp(quote), now, 1_800);
+  const freshness = assessFreshness(sourceTimestamp(quote), evaluatedAt, 1_800);
   return {
     available: positiveNumber(quote.close ?? quote.price) !== null,
     price: positiveNumber(quote.close ?? quote.price),
@@ -280,14 +286,14 @@ function normalizeDirection(marketQuotes, now) {
   };
 }
 
-function validateFrontMonthQuote(quote, now = new Date()) {
+function validateFrontMonthQuote(quote, evaluatedAt = new Date()) {
   if (!quote) return { valid: false, reason: "explicit_front_month_absent" };
   const sourceText = `${quote.source ?? ""} ${quote.sourceSymbol ?? ""} ${quote.quoteType ?? ""}`.toLowerCase();
   if (sourceText.includes("dailymarketreport") || sourceText.includes("daily market report")) return { valid: false, reason: "daily_report_is_not_live_front_month" };
   if (quote.explicitContract !== true || !/^\d{6}$/.test(String(quote.contractMonth ?? ""))) return { valid: false, reason: "missing_explicit_contract_month" };
   if (quote.quoteType !== "explicit_contract_live" || quote.live !== true) return { valid: false, reason: "quote_is_not_explicit_contract_live" };
   if (!quote.source || quote.quoteType === "continuous_nearby_direction") return { valid: false, reason: "continuous_or_unsourced_quote_rejected" };
-  const freshness = assessFreshness(sourceTimestamp(quote), now, 1_800);
+  const freshness = assessFreshness(sourceTimestamp(quote), evaluatedAt, 1_800);
   if (!freshness.sourceAt) return { valid: false, reason: "missing_source_timestamp" };
   const price = positiveNumber(quote.last ?? quote.close ?? quote.price);
   const bid = compactArray(quote.bestBid ?? [quote.bid])[0] ?? null;
@@ -296,9 +302,9 @@ function validateFrontMonthQuote(quote, now = new Date()) {
   return { valid: true, price, bid, ask, freshness };
 }
 
-function normalizeFrontMonth(marketQuotes, now) {
+function normalizeFrontMonth(marketQuotes, evaluatedAt) {
   const quote = marketQuotes.get("TX_FRONT_MONTH");
-  const validation = validateFrontMonthQuote(quote, now);
+  const validation = validateFrontMonthQuote(quote, evaluatedAt);
   if (!validation.valid) {
     return {
       ...unavailable(validation.reason),
@@ -366,16 +372,27 @@ function compactSamples(samples) {
 }
 
 function normalizeIntraday(snapshot, stage) {
-  if (stage !== "1030") return { firstHour: null, intradayWindow: null, samples: [] };
+  if (stage !== "1030") return { firstHour: null, intradayWindow: null, samples: [], coverage: null, sourceLimitations: [] };
   const window = snapshot?.intradayWindow;
-  if (!isObject(window)) return { firstHour: null, intradayWindow: null, samples: [] };
+  if (!isObject(window)) return { firstHour: null, intradayWindow: null, samples: [], coverage: null, sourceLimitations: [] };
   const trendSymbols = {};
   for (const symbol of SPOT_SYMBOLS) {
     const trend = window.trend?.symbols?.[symbol];
     if (trend) trendSymbols[symbol] = trend;
   }
+  const firstHour = compactFirstHour(window.firstHour);
+  const compactedSamples = compactSamples(window.samples);
+  const sampleSymbols = new Set();
+  for (const sample of Array.isArray(window.samples) ? window.samples : []) {
+    for (const symbol of SPOT_SYMBOLS) if (sample?.quotes?.[symbol]) sampleSymbols.add(symbol);
+  }
+  const coverage = { firstHour: {}, samples: {} };
+  for (const symbol of SPOT_SYMBOLS) {
+    coverage.firstHour[symbol] = firstHour?.symbols?.[symbol] ? "available" : "missing";
+    coverage.samples[symbol] = sampleSymbols.has(symbol) ? "available" : "missing";
+  }
   return {
-    firstHour: compactFirstHour(window.firstHour),
+    firstHour,
     intradayWindow: {
       tradingDate: window.tradingDate ?? null,
       updatedAt: window.updatedAt ?? null,
@@ -384,7 +401,9 @@ function normalizeIntraday(snapshot, stage) {
       sampleCount: Array.isArray(window.samples) ? window.samples.length : 0,
       trend: isObject(window.trend) ? { asOf: window.trend.asOf ?? null, sampleCount: finiteNumber(window.trend.sampleCount), symbols: trendSymbols } : null,
     },
-    samples: compactSamples(window.samples),
+    samples: compactedSamples,
+    coverage,
+    sourceLimitations: [],
   };
 }
 
@@ -465,20 +484,25 @@ function midnightGate(data, now) {
   return { missingRequired, qualityReasons, assessments: { TSM: tsm, SOX_or_QQQ_NASDAQ: broad } };
 }
 
-function determineStatus(stage, data, fetchErrors, testMode, now = new Date(data.generatedAt ?? Date.now())) {
+function determineStatus(stage, data, fetchErrors, testMode, evaluatedAt = new Date(data.generatedAt ?? Date.now()), startedAt = null) {
   const missingRequired = [];
   const missingOptional = [];
   const qualityReasons = [];
-  const stageOpen = stageWindowOpen(stage, data.targetDate, now);
+  const collectionStart = startedAt ?? payloadCollectionStartedAt(data, evaluatedAt) ?? evaluatedAt;
+  const stageOpen = stageWindowOpen(stage, data.targetDate, collectionStart);
   if (!stageOpen) missingRequired.push("stage." + stage + ".not_before");
   if (!data.marketHealth.available) missingOptional.push("marketHealth");
 
   if (stage === "1030") {
-    for (const symbol of CORE_SPOT) {
+    const hasFreshCurrentSpot = (symbol) => {
       const quote = data.spot[symbol];
-      if (quote?.price === null || quote?.priceKind !== "last_trade" || quote?.freshness?.status !== "fresh" || !sourceDateMatches(quote, data.targetDate)) {
-        missingRequired.push("spot." + symbol + ".current_last_trade");
-      }
+      return quote?.price !== null &&
+        quote?.priceKind === "last_trade" &&
+        quote?.freshness?.status === "fresh" &&
+        sourceDateMatches(quote, data.targetDate);
+    };
+    for (const symbol of CORE_SPOT) {
+      if (!hasFreshCurrentSpot(symbol)) missingRequired.push("spot." + symbol + ".current_last_trade");
     }
     const optionalSpot = data.spot["00631L"];
     if (optionalSpot?.price === null || optionalSpot?.freshness?.status !== "fresh" || !sourceDateMatches(optionalSpot, data.targetDate)) {
@@ -490,7 +514,7 @@ function determineStatus(stage, data, fetchErrors, testMode, now = new Date(data
     if (!firstHour || firstHourDate !== data.targetDate) {
       missingRequired.push("intraday.firstHour.current_target_date");
     } else {
-      for (const symbol of CORE_SPOT) if (!firstHour.symbols?.[symbol]) missingRequired.push("intraday.firstHour." + symbol);
+      for (const symbol of ["0050", "TAIEX"]) if (!firstHour.symbols?.[symbol]) missingRequired.push("intraday.firstHour." + symbol);
     }
     const window = data.intraday.intradayWindow;
     if (!window || window.tradingDate !== data.targetDate) {
@@ -503,8 +527,27 @@ function determineStatus(stage, data, fetchErrors, testMode, now = new Date(data
         return sampleDate && Number.isFinite(sampleDate.getTime()) && dateInTaipei(sampleDate) === data.targetDate;
       });
       const sampleSymbols = new Set();
-      for (const sample of currentSamples) for (const symbol of CORE_SPOT) if (sample?.quotes?.[symbol]) sampleSymbols.add(symbol);
-      for (const symbol of CORE_SPOT) if (!sampleSymbols.has(symbol)) missingRequired.push("intraday.intradayWindow.samples." + symbol);
+      for (const sample of currentSamples) {
+        for (const symbol of CORE_SPOT) if (sample?.quotes?.[symbol]) sampleSymbols.add(symbol);
+      }
+      for (const symbol of ["0050", "TAIEX"]) if (!sampleSymbols.has(symbol)) missingRequired.push("intraday.intradayWindow.samples." + symbol);
+
+      const sourceCoverage = data.intraday.coverage ?? { firstHour: {}, samples: {} };
+      const firstHour2330Missing = sourceCoverage.firstHour?.["2330"] === "missing";
+      const samples2330Missing = sourceCoverage.samples?.["2330"] === "missing";
+      const structurallyUnavailable2330 = firstHour2330Missing && samples2330Missing && hasFreshCurrentSpot("2330");
+      if (structurallyUnavailable2330) {
+        data.intraday.coverage.firstHour["2330"] = "structurally_unavailable_from_source";
+        data.intraday.coverage.samples["2330"] = "structurally_unavailable_from_source";
+        data.intraday.sourceLimitations = Array.isArray(data.intraday.sourceLimitations) ? data.intraday.sourceLimitations : [];
+        if (!data.intraday.sourceLimitations.includes("intraday.2330_not_sampled_by_source")) {
+          data.intraday.sourceLimitations.push("intraday.2330_not_sampled_by_source");
+        }
+        qualityReasons.push("intraday.2330_not_sampled_by_source");
+      } else {
+        if (!firstHour.symbols?.["2330"]) missingRequired.push("intraday.firstHour.2330");
+        if (!sampleSymbols.has("2330")) missingRequired.push("intraday.intradayWindow.samples.2330");
+      }
     }
   } else if (stage === "0850") {
     for (const symbol of CORE_SPOT) {
@@ -514,7 +557,7 @@ function determineStatus(stage, data, fetchErrors, testMode, now = new Date(data
       if (quote?.actualOpen !== null) missingRequired.push("spot." + symbol + ".actualOpen_must_be_null_at_0850");
     }
   } else {
-    const midnight = midnightGate(data, now);
+    const midnight = midnightGate(data, evaluatedAt);
     missingRequired.push(...midnight.missingRequired);
     qualityReasons.push(...midnight.qualityReasons);
   }
@@ -590,44 +633,53 @@ async function readJsonIfPresent(filePath) {
 function isReasonableReady(payload, stage, targetDate) {
   const asOf = payload?.generatedAt ?? payload?.asOf;
   const generatedAt = asOf ? new Date(asOf) : null;
+  const stageReference = payloadCollectionStartedAt(payload, generatedAt);
   return payload?.status === "READY" &&
     payload?.stage === stage &&
     payload?.targetDate === targetDate &&
     REQUIRED_KEYS.every((key) => key in payload) &&
     generatedAt !== null &&
     Number.isFinite(generatedAt.getTime()) &&
-    stageWindowOpen(stage, targetDate, generatedAt);
+    stageReference !== null &&
+    stageWindowOpen(stage, targetDate, stageReference);
 }
 
-async function buildPayload(stage, testMode, now = new Date()) {
+async function buildPayload(stage, testMode, startedAt = new Date()) {
   const results = await Promise.all(Object.entries(ENDPOINTS).map(async ([name, url]) => [name, await fetchJson(name, url)]));
+  const evaluatedAt = new Date();
   const responses = Object.fromEntries(results);
   const fetchErrors = Object.values(responses).map((result) => result.error).filter(Boolean);
   const marketData = responses.marketData.data;
   const snapshot = responses.snapshot.data;
   const quotes = quoteMap(marketData);
-  const targetDate = targetDateFor(stage, now);
+  const targetDate = targetDateFor(stage, startedAt);
 
   const data = {
     schemaVersion: "1.0.0",
     stage,
     status: "COLLECTING",
-    generatedAt: now.toISOString(),
+    generatedAt: evaluatedAt.toISOString(),
     targetDate,
     sourceSite: { baseUrl: SOURCE_SITE, endpoints: ENDPOINTS },
     marketHealth: summarizeHealth(responses.health.data),
-    spot: Object.fromEntries(SPOT_SYMBOLS.map((symbol) => [symbol, normalizeSpot(symbol, snapshot, quotes, stage, now)])),
-    overnight: Object.fromEntries(OVERNIGHT_SYMBOLS.map((symbol) => [symbol, normalizeOvernight(symbol, quotes, now)])),
-    futures: { TX_DIRECTION: normalizeDirection(quotes, now), TX_FRONT_MONTH: normalizeFrontMonth(quotes, now) },
+    spot: Object.fromEntries(SPOT_SYMBOLS.map((symbol) => [symbol, normalizeSpot(symbol, snapshot, quotes, stage, evaluatedAt)])),
+    overnight: Object.fromEntries(OVERNIGHT_SYMBOLS.map((symbol) => [symbol, normalizeOvernight(symbol, quotes, evaluatedAt)])),
+    futures: { TX_DIRECTION: normalizeDirection(quotes, evaluatedAt), TX_FRONT_MONTH: normalizeFrontMonth(quotes, evaluatedAt) },
     intraday: normalizeIntraday(snapshot, stage),
     freshnessSummary: null,
     missingRequired: [],
     missingOptional: [],
     errors: fetchErrors.map((message) => ({ source: "public_api", message })),
-    collection: { testMode, latestUpdated: false, sourceSchemas: { health: responses.health.data?.status ?? null, marketData: marketData?.schemaVersion ?? null, snapshot: snapshot?.schemaVersion ?? null } },
+    collection: {
+      testMode,
+      latestUpdated: false,
+      startedAt: startedAt.toISOString(),
+      evaluatedAt: evaluatedAt.toISOString(),
+      sourceSchemas: { health: responses.health.data?.status ?? null, marketData: marketData?.schemaVersion ?? null, snapshot: snapshot?.schemaVersion ?? null },
+    },
   };
   data.freshnessSummary = freshnessSummary(data, testMode);
-  const decision = determineStatus(stage, data, fetchErrors, testMode, now);
+  const decision = determineStatus(stage, data, fetchErrors, testMode, evaluatedAt, startedAt);
   data.status = decision.status;
   data.missingRequired = decision.missingRequired;
   data.missingOptional = decision.missingOptional;
@@ -647,7 +699,7 @@ async function writeCollection(payload, testMode) {
   let latestUpdated = false;
   if (!testMode) {
     const existing = await readJsonIfPresent(latestPath);
-    const readyForLatest = payload.status === "READY" && stageWindowOpen(payload.stage, payload.targetDate, new Date(payload.generatedAt ?? 0));
+    const readyForLatest = payload.status === "READY" && stageWindowOpen(payload.stage, payload.targetDate, payloadCollectionStartedAt(payload, new Date(payload.generatedAt ?? 0)));
     if (readyForLatest || (payload.status !== "READY" && existing?.status !== "READY")) {
       const latest = structuredClone(payload);
       latest.collection.latestUpdated = true;
@@ -666,37 +718,47 @@ async function runSelfTest() {
   const assert = (condition, message) => {
     if (!condition) failures.push(message);
   };
-  const makeFixture = (stage, now, options = {}) => {
-    const targetDate = targetDateFor(stage, now);
-    const freshAt = new Date(now.getTime() - 60_000).toISOString();
+  const makeFixture = (stage, evaluatedAt, options = {}) => {
+    const targetDate = targetDateFor(stage, evaluatedAt);
+    const startedAt = options.startedAt ?? evaluatedAt;
+    const freshAt = new Date(evaluatedAt.getTime() - 60_000).toISOString();
     const spot = Object.fromEntries(SPOT_SYMBOLS.map((symbol) => [symbol, {
       available: true, price: 100, priceKind: "last_trade",
       actualOpen: stage === "0850" ? null : 100,
       freshness: { status: "fresh", sourceAt: freshAt },
     }]));
-    const firstHourSymbols = Object.fromEntries(CORE_SPOT.map((symbol) => [symbol, { open: 100, high: 101, low: 99, last: 100 }]));
-    const samples = [{ at: freshAt, quotes: Object.fromEntries(CORE_SPOT.map((symbol) => [symbol, { price: 100 }])) }];
-    const overnightAt = new Date(now.getTime() - (options.overnightAgeSeconds ?? 60) * 1000).toISOString();
+    const include2330 = options.intraday2330 !== false;
+    const intradaySymbols = include2330 ? CORE_SPOT : ["0050", "TAIEX"];
+    const firstHourSymbols = Object.fromEntries(intradaySymbols.map((symbol) => [symbol, { open: 100, high: 101, low: 99, last: 100 }]));
+    const samples = [{ at: freshAt, quotes: Object.fromEntries(intradaySymbols.map((symbol) => [symbol, { price: 100 }])) }];
+    const coverage = {
+      firstHour: Object.fromEntries(SPOT_SYMBOLS.map((symbol) => [symbol, intradaySymbols.includes(symbol) ? "available" : "missing"])),
+      samples: Object.fromEntries(SPOT_SYMBOLS.map((symbol) => [symbol, intradaySymbols.includes(symbol) ? "available" : "missing"])),
+    };
+    const overnightAt = new Date(evaluatedAt.getTime() - (options.overnightAgeSeconds ?? 60) * 1000).toISOString();
     const overnight = Object.fromEntries(["TSM", "SOX"].map((symbol) => [symbol, {
       available: true, price: 100, sourceAt: overnightAt, source: "fixture",
       quoteType: "regular_market_quote", completedSession: options.completedSession === true,
       freshness: { status: "fresh", sourceAt: overnightAt },
     }]));
     overnight.QQQ_NASDAQ = { available: false, price: null, sourceAt: null, freshness: { status: "missing", sourceAt: null } };
-    const intraday = options.intradayMissing ? { firstHour: null, intradayWindow: null, samples: [] } : {
+    const intraday = options.intradayMissing ? { firstHour: null, intradayWindow: null, samples: [], coverage: null, sourceLimitations: [] } : {
       firstHour: { tradingDate: targetDate, through: targetDate + "T10:00:00+08:00", symbols: firstHourSymbols },
-      intradayWindow: { tradingDate: targetDate, sampleCount: 1 }, samples,
+      intradayWindow: { tradingDate: targetDate, sampleCount: 1 }, samples, coverage, sourceLimitations: [],
     };
     return {
-      schemaVersion: "1.0.0", stage, status: "COLLECTING", generatedAt: now.toISOString(), targetDate,
+      schemaVersion: "1.0.0", stage, status: "COLLECTING", generatedAt: evaluatedAt.toISOString(), targetDate,
       sourceSite: { baseUrl: "fixture", endpoints: {} }, marketHealth: { available: true },
       spot, overnight, futures: { TX_DIRECTION: { available: true }, TX_FRONT_MONTH: { available: true } },
       intraday, freshnessSummary: {}, missingRequired: [], errors: [],
+      collection: { testMode: false, latestUpdated: false, startedAt: startedAt.toISOString(), evaluatedAt: evaluatedAt.toISOString() },
     };
   };
   const now = new Date("2026-08-15T02:30:00.000Z");
   assert(assessFreshness("2020-01-01T00:00:00.000Z", now, 600).status === "stale", "old sourceAt became fresh");
   assert(assessFreshness(null, now, 600).status === "missing", "missing sourceAt did not stay missing");
+  const sourceBeforeEvaluation = assessFreshness("2026-08-14T19:32:16.000Z", new Date("2026-08-14T19:32:24.000Z"), 1_800);
+  assert(sourceBeforeEvaluation.status === "fresh" && sourceBeforeEvaluation.ageSeconds === 8, "sourceAt before evaluatedAt was misclassified");
   const skew = assessFreshness(new Date(now.getTime() + 2_000).toISOString(), now, 1_800);
   assert(skew.status === "fresh" && skew.ageSeconds === 0 && skew.clockSkewClamped === true, "small future clock skew was not clamped to zero");
   assert(assessFreshness(new Date(now.getTime() + 301_000).toISOString(), now, 1_800).status === "invalid", "future source time over five minutes was accepted");
@@ -707,35 +769,68 @@ async function runSelfTest() {
   const bidAskOnly = { quoteType: "explicit_contract_live", explicitContract: true, contractMonth: "202608", live: true, close: null, bestBid: [19999], bestAsk: [20001], source: "live explicit contract", updatedAt: now.toISOString() };
   const bidAskResult = validateFrontMonthQuote(bidAskOnly, now);
   assert(bidAskResult.valid && bidAskResult.price === null && bidAskResult.bid === 19999 && bidAskResult.ask === 20001, "bid/ask-only quote was rejected or midpoint was fabricated");
-  const warm1030 = new Date("2026-08-15T02:27:00.000Z");
-  const ready1030 = new Date("2026-08-15T02:32:00.000Z");
-  assert(determineStatus("1030", makeFixture("1030", warm1030), [], false, warm1030).status === "COLLECTING", "10:27 was allowed to become READY");
-  assert(determineStatus("1030", makeFixture("1030", ready1030), [], false, ready1030).status === "READY", "10:32 did not pass the stage gate");
-  const warm0850 = new Date("2026-08-15T00:47:00.000Z");
+
+  const warmStart = new Date("2026-08-15T02:27:00.000Z");
+  const warmEvaluation = new Date("2026-08-15T02:32:00.000Z");
+  const warm1030 = makeFixture("1030", warmEvaluation, { startedAt: warmStart });
+  assert(determineStatus("1030", warm1030, [], false, warmEvaluation, warmStart).status === "COLLECTING", "10:27 start remained eligible after retry crossed gate");
+  const readyStart = new Date("2026-08-15T02:32:00.000Z");
+  const readyEvaluation = new Date("2026-08-15T02:32:25.000Z");
+  const ready1030 = makeFixture("1030", readyEvaluation, { startedAt: readyStart });
+  assert(determineStatus("1030", ready1030, [], false, readyEvaluation, readyStart).status === "READY", "10:32 start did not pass the stage gate");
+
+  const warm0850Start = new Date("2026-08-15T00:47:00.000Z");
+  const warm0850Evaluation = new Date("2026-08-15T00:52:00.000Z");
+  const warm0850 = makeFixture("0850", warm0850Evaluation, { startedAt: warm0850Start });
+  assert(determineStatus("0850", warm0850, [], false, warm0850Evaluation, warm0850Start).status === "COLLECTING", "08:47 start remained eligible after retry crossed gate");
   const ready0850 = new Date("2026-08-15T00:52:00.000Z");
-  assert(determineStatus("0850", makeFixture("0850", warm0850), [], false, warm0850).status === "COLLECTING", "08:47 was allowed to become READY");
   assert(determineStatus("0850", makeFixture("0850", ready0850), [], false, ready0850).status === "READY", "08:52 did not pass the stage gate");
-  const warm0000 = new Date("2026-08-14T15:57:00.000Z");
+
+  const warm0000Start = new Date("2026-08-14T15:57:00.000Z");
+  const warm0000Evaluation = new Date("2026-08-14T16:03:00.000Z");
+  const warm0000 = makeFixture("0000", warm0000Evaluation, { startedAt: warm0000Start });
+  assert(determineStatus("0000", warm0000, [], false, warm0000Evaluation, warm0000Start).status === "COLLECTING", "23:57 start remained eligible after retry crossed gate");
   const ready0000 = new Date("2026-08-14T16:03:00.000Z");
-  assert(determineStatus("0000", makeFixture("0000", warm0000), [], false, warm0000).status === "COLLECTING", "23:57 was allowed to become READY");
   assert(determineStatus("0000", makeFixture("0000", ready0000), [], false, ready0000).status === "READY", "00:03 did not pass the stage gate");
-  const preGateReady = makeFixture("1030", warm1030); preGateReady.status = "READY";
-  assert(!isReasonableReady(preGateReady, "1030", preGateReady.targetDate), "pre-gate generatedAt was accepted as READY");
-  const postGateReady = makeFixture("1030", ready1030); postGateReady.status = "READY";
-  assert(isReasonableReady(postGateReady, "1030", postGateReady.targetDate), "post-gate generatedAt was rejected as READY");
+
+  const preGateLongRunning = makeFixture("1030", warmEvaluation, { startedAt: warmStart });
+  preGateLongRunning.status = "READY";
+  assert(!isReasonableReady(preGateLongRunning, "1030", preGateLongRunning.targetDate), "pre-gate collection.startedAt was accepted as READY");
+  const postGateReady = makeFixture("1030", readyEvaluation, { startedAt: readyStart });
+  postGateReady.status = "READY";
+  assert(isReasonableReady(postGateReady, "1030", postGateReady.targetDate), "post-gate collection.startedAt was rejected as READY");
+
   const staleMidnight = makeFixture("0000", ready0000, { overnightAgeSeconds: 31 * 60 });
   const staleDecision = determineStatus("0000", staleMidnight, [], false, ready0000);
   assert(staleDecision.status !== "READY" && staleDecision.missingRequired.some((item) => item.includes("overnight.TSM")), "stale TSM/SOX data became midnight READY");
   const delayedMidnight = makeFixture("0000", ready0000, { overnightAgeSeconds: 20 * 60 });
   const delayedDecision = determineStatus("0000", delayedMidnight, [], false, ready0000);
   assert(delayedDecision.status === "READY" && delayedDecision.quality === "downgraded", "delayed midnight data did not produce downgraded READY quality");
-  const missingIntraday = makeFixture("1030", ready1030, { intradayMissing: true });
-  const missingIntradayDecision = determineStatus("1030", missingIntraday, [], false, ready1030);
+
+  const structural2330 = makeFixture("1030", readyEvaluation, { intraday2330: false });
+  const structuralDecision = determineStatus("1030", structural2330, [], false, readyEvaluation);
+  assert(structuralDecision.status === "READY", "structurally unavailable 2330 intraday blocked READY");
+  assert(structuralDecision.quality === "downgraded", "structurally unavailable 2330 intraday did not downgrade quality");
+  assert(structuralDecision.qualityReasons.includes("intraday.2330_not_sampled_by_source"), "2330 structural source limitation reason missing");
+  assert(structural2330.intraday.coverage.firstHour["2330"] === "structurally_unavailable_from_source" &&
+    structural2330.intraday.coverage.samples["2330"] === "structurally_unavailable_from_source", "2330 structural coverage schema missing");
+  assert(structural2330.intraday.sourceLimitations.includes("intraday.2330_not_sampled_by_source"), "2330 source limitation missing");
+  assert(!structural2330.intraday.firstHour.symbols["2330"] && !structural2330.intraday.samples[0].quotes["2330"], "2330 first-hour values were fabricated");
+
+  const complete2330 = makeFixture("1030", readyEvaluation);
+  const completeDecision = determineStatus("1030", complete2330, [], false, readyEvaluation);
+  assert(completeDecision.status === "READY" && completeDecision.quality === "standard" && complete2330.intraday.sourceLimitations.length === 0, "complete 2330 intraday coverage was downgraded or limited");
+
+  const missingIntraday = makeFixture("1030", readyEvaluation, { intradayMissing: true });
+  const missingIntradayDecision = determineStatus("1030", missingIntraday, [], false, readyEvaluation);
   assert(missingIntradayDecision.status !== "READY" && missingIntradayDecision.missingRequired.some((item) => item.startsWith("intraday.")), "1030 missing intraday core was accepted");
-  const no2330 = makeFixture("1030", ready1030);
-  delete no2330.intraday.firstHour.symbols["2330"]; delete no2330.intraday.samples[0].quotes["2330"];
-  const no2330Decision = determineStatus("1030", no2330, [], false, ready1030);
-  assert(no2330Decision.missingRequired.includes("intraday.firstHour.2330") && no2330Decision.missingRequired.includes("intraday.intradayWindow.samples.2330"), "missing 2330 intraday coverage was not recorded");
+  const missing0050 = makeFixture("1030", readyEvaluation);
+  delete missing0050.intraday.firstHour.symbols["0050"];
+  delete missing0050.intraday.samples[0].quotes["0050"];
+  const missing0050Decision = determineStatus("1030", missing0050, [], false, readyEvaluation);
+  assert(missing0050Decision.status !== "READY" && missing0050Decision.missingRequired.includes("intraday.firstHour.0050") &&
+    missing0050Decision.missingRequired.includes("intraday.intradayWindow.samples.0050"), "missing 0050 first-hour/sample coverage was accepted");
+
   const templateFiles = [...["0000", "0850", "1030"].flatMap((stage) => ["latest_" + stage + ".json", "status_" + stage + ".json"])];
   for (const fileName of templateFiles) {
     const payload = await readJsonIfPresent(path.join(ROOT, fileName));
