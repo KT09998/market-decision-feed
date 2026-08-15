@@ -39,8 +39,8 @@ jobs:
         id: vars
         shell: bash
         env:
-          EVENT_NAME: \${{ github.event_name }}
-          INPUT_TEST_MODE: \${{ inputs.test_mode }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TEST_MODE: ${{ inputs.test_mode }}
         run: |
           set -euo pipefail
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
@@ -56,18 +56,18 @@ jobs:
       - name: Collect public close data
         shell: bash
         env:
-          TEST_MODE: \${{ steps.vars.outputs.test_mode }}
+          TEST_MODE: ${{ steps.vars.outputs.test_mode }}
         run: |
           set -euo pipefail
           args=()
           if [[ "$TEST_MODE" == "true" ]]; then args+=(--test-mode); fi
-          node scripts/collect-close.mjs "\${args[@]}"
+          node scripts/collect-close.mjs "${args[@]}"
 
       - name: Upload close evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: market-close-\${{ github.run_id }}
+          name: market-close-${{ github.run_id }}
           path: |
             status_close.json
             latest_close.json
@@ -75,10 +75,10 @@ jobs:
           retention-days: 14
 
       - name: Commit close status
-        if: \${{ success() }}
+        if: ${{ success() }}
         shell: bash
         env:
-          TEST_MODE: \${{ steps.vars.outputs.test_mode }}
+          TEST_MODE: ${{ steps.vars.outputs.test_mode }}
         run: |
           set -euo pipefail
           git add status_close.json
@@ -96,3 +96,4 @@ jobs:
             git commit -m "data: collect close $target_date"
           fi
           git push
+
