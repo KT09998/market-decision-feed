@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "stage": "close",
+  "status": "COLLECTING",
+  "generatedAt": null,
+  "targetDate": null,
+  "sourceSite": {
+    "baseUrl": "https://tw-stock-dashboard.netlify.app",
+    "endpoints": {
+      "health": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-data-health",
+      "marketData": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-data",
+      "snapshot": "https://tw-stock-dashboard.netlify.app/.netlify/functions/market-snapshot"
+    }
+  },
+  "marketHealth": { "available": false, "status": "initial" },
+  "spot": {},
+  "intraday": {},
+  "sessionStructure": {},
+  "freshnessSummary": {
+    "basis": "sourceAt_or_updatedAt_only",
+    "fetchedAtIsFreshnessEvidence": false,
+    "maxAgeSeconds": 1200,
+    "testMode": false
+  },
+  "missingRequired": ["no_collection_attempt_yet"],
+  "missingOptional": [],
+  "errors": [],
+  "collection": {
+    "testMode": false,
+    "latestUpdated": false,
+    "startedAt": null,
+    "evaluatedAt": null
+  }
+}
