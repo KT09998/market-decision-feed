@@ -2,8 +2,8 @@
   "schemaVersion": "1.0.0",
   "stage": "0000",
   "status": "READY",
-  "generatedAt": "2026-08-15T16:17:57.859Z",
-  "targetDate": "2026-08-16",
+  "generatedAt": "2026-08-16T16:17:42.406Z",
+  "targetDate": "2026-08-17",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
     "endpoints": {
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "degraded",
-    "checkedAt": "2026-08-15T16:17:56.576Z",
+    "checkedAt": "2026-08-16T16:17:42.328Z",
     "session": "closed",
     "components": {
       "marketData": {
@@ -63,10 +63,10 @@
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_2330.tw",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T05:30:00.000Z",
-        "ageSeconds": 125278,
-        "rawAgeSeconds": 125278,
+        "ageSeconds": 211662,
+        "rawAgeSeconds": 211662,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -89,10 +89,10 @@
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_0050.tw",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T05:30:00.000Z",
-        "ageSeconds": 125278,
-        "rawAgeSeconds": 125278,
+        "ageSeconds": 211662,
+        "rawAgeSeconds": 211662,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -115,10 +115,10 @@
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_t00.tw",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T05:33:00.000Z",
-        "ageSeconds": 125098,
-        "rawAgeSeconds": 125098,
+        "ageSeconds": 211482,
+        "rawAgeSeconds": 211482,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -141,10 +141,10 @@
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_00631L.tw",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T05:30:00.000Z",
-        "ageSeconds": 125278,
-        "rawAgeSeconds": 125278,
+        "ageSeconds": 211662,
+        "rawAgeSeconds": 211662,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -164,10 +164,10 @@
       "session": null,
       "marketState": null,
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T20:00:03.000Z",
-        "ageSeconds": 73075,
-        "rawAgeSeconds": 73075,
+        "ageSeconds": 159459,
+        "rawAgeSeconds": 159459,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -185,10 +185,10 @@
       "session": null,
       "marketState": null,
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T21:15:59.000Z",
-        "ageSeconds": 68519,
-        "rawAgeSeconds": 68519,
+        "ageSeconds": 154903,
+        "rawAgeSeconds": 154903,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -222,10 +222,10 @@
       "session": null,
       "marketState": null,
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T20:00:00.000Z",
-        "ageSeconds": 73078,
-        "rawAgeSeconds": 73078,
+        "ageSeconds": 159462,
+        "rawAgeSeconds": 159462,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -243,10 +243,10 @@
       "session": null,
       "marketState": null,
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-14T20:00:01.000Z",
-        "ageSeconds": 73077,
-        "rawAgeSeconds": 73077,
+        "ageSeconds": 159461,
+        "rawAgeSeconds": 159461,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -298,8 +298,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-14T20:59:54.000Z",
-        "ageSeconds": 69484,
-        "rawAgeSeconds": 69484,
+        "ageSeconds": 155868,
+        "rawAgeSeconds": 155868,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -322,8 +322,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-14T20:59:54.000Z",
-        "ageSeconds": 69484,
-        "rawAgeSeconds": 69484,
+        "ageSeconds": 155868,
+        "rawAgeSeconds": 155868,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -342,8 +342,8 @@
     "fetchedAtIsFreshnessEvidence": false,
     "testMode": false,
     "counts": {
-      "fresh": 8,
-      "stale": 2,
+      "fresh": 0,
+      "stale": 10,
       "missing": 3,
       "invalid": 0
     },
@@ -361,8 +361,8 @@
   "collection": {
     "testMode": false,
     "latestUpdated": true,
-    "startedAt": "2026-08-15T16:17:45.490Z",
-    "evaluatedAt": "2026-08-15T16:17:57.859Z",
+    "startedAt": "2026-08-16T16:17:29.441Z",
+    "evaluatedAt": "2026-08-16T16:17:42.406Z",
     "sourceSchemas": {
       "health": "degraded",
       "marketData": "1.1",
