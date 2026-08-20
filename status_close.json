@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "stage": "close",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-20T05:58:00.617Z",
+  "generatedAt": "2026-08-20T06:01:33.649Z",
   "targetDate": "2026-08-20",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "degraded",
-    "checkedAt": "2026-08-20T05:57:50.104Z",
+    "checkedAt": "2026-08-20T06:01:33.619Z",
     "session": "closed",
     "components": {
       "marketData": {
@@ -64,8 +64,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-20T05:30:00.000Z",
-        "ageSeconds": 1681,
-        "rawAgeSeconds": 1681,
+        "ageSeconds": 1894,
+        "rawAgeSeconds": 1894,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -92,8 +92,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-20T05:30:00.000Z",
-        "ageSeconds": 1681,
-        "rawAgeSeconds": 1681,
+        "ageSeconds": 1894,
+        "rawAgeSeconds": 1894,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -120,8 +120,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-20T05:33:00.000Z",
-        "ageSeconds": 1501,
-        "rawAgeSeconds": 1501,
+        "ageSeconds": 1714,
+        "rawAgeSeconds": 1714,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -148,8 +148,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-20T05:30:00.000Z",
-        "ageSeconds": 1681,
-        "rawAgeSeconds": 1681,
+        "ageSeconds": 1894,
+        "rawAgeSeconds": 1894,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -419,8 +419,8 @@
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-20T05:57:38.928Z",
-    "evaluatedAt": "2026-08-20T05:58:00.617Z",
+    "startedAt": "2026-08-20T06:00:43.550Z",
+    "evaluatedAt": "2026-08-20T06:01:33.649Z",
     "sourceSchemas": {
       "health": "degraded",
       "marketData": "1.1",
