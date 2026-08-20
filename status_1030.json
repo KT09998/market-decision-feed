@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0.0",
   "stage": "1030",
-  "status": "READY",
-  "generatedAt": "2026-08-19T03:25:20.693Z",
-  "targetDate": "2026-08-19",
+  "status": "DEGRADED",
+  "generatedAt": "2026-08-20T03:16:31.932Z",
+  "targetDate": "2026-08-20",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
     "endpoints": {
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "degraded",
-    "checkedAt": "2026-08-19T03:25:09.186Z",
+    "checkedAt": "2026-08-20T03:16:31.887Z",
     "session": "open",
     "components": {
       "marketData": {
@@ -39,7 +39,7 @@
         "ok": true,
         "httpStatus": null,
         "mode": null,
-        "sourceAt": "2026-08-19T03:20:10.788Z",
+        "sourceAt": "2026-08-20T03:15:16.265Z",
         "sampleCount": 19,
         "firstHourReady": true
       }
@@ -48,25 +48,25 @@
   "spot": {
     "2330": {
       "available": true,
-      "price": 2350,
+      "price": null,
       "indicativePrice": null,
-      "previousClose": 2380,
-      "changePercent": -1.26,
-      "actualOpen": null,
-      "high": null,
-      "low": null,
-      "bid": 2345,
-      "ask": 2350,
-      "priceKind": "last_trade",
-      "isReferencePrice": false,
-      "sourceAt": "2026-08-19T03:24:35.000Z",
-      "source": "TWSE MIS official quote + Yahoo Finance history",
+      "previousClose": 2350,
+      "changePercent": null,
+      "actualOpen": 2365,
+      "high": 2370,
+      "low": 2350,
+      "bid": 2355,
+      "ask": 2360,
+      "priceKind": "best_ask_reference",
+      "isReferencePrice": true,
+      "sourceAt": "2026-08-20T03:16:00.000Z",
+      "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_2330.tw",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-19T03:24:35.000Z",
-        "ageSeconds": 46,
-        "rawAgeSeconds": 46,
+        "sourceAt": "2026-08-20T03:16:00.000Z",
+        "ageSeconds": 32,
+        "rawAgeSeconds": 32,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -74,25 +74,25 @@
     },
     "0050": {
       "available": true,
-      "price": 103.55,
+      "price": null,
       "indicativePrice": null,
-      "previousClose": 104.9,
-      "changePercent": -1.29,
-      "actualOpen": 103.05,
-      "high": 103.85,
-      "low": 102.7,
-      "bid": 103.5,
-      "ask": 103.55,
-      "priceKind": "last_trade",
-      "isReferencePrice": false,
-      "sourceAt": "2026-08-19T03:24:43.000Z",
+      "previousClose": 103.1,
+      "changePercent": null,
+      "actualOpen": 104.2,
+      "high": 104.25,
+      "low": 102.95,
+      "bid": 103.25,
+      "ask": 103.3,
+      "priceKind": "best_ask_reference",
+      "isReferencePrice": true,
+      "sourceAt": "2026-08-20T03:15:59.000Z",
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_0050.tw",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-19T03:24:43.000Z",
-        "ageSeconds": 38,
-        "rawAgeSeconds": 38,
+        "sourceAt": "2026-08-20T03:15:59.000Z",
+        "ageSeconds": 33,
+        "rawAgeSeconds": 33,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -100,25 +100,25 @@
     },
     "TAIEX": {
       "available": true,
-      "price": 44698.02,
+      "price": 44604.37,
       "indicativePrice": null,
-      "previousClose": 45308.68,
-      "changePercent": -1.35,
-      "actualOpen": 45071.34,
-      "high": 45071.34,
-      "low": 44308.71,
+      "previousClose": 44719.35,
+      "changePercent": -0.26,
+      "actualOpen": 44942.01,
+      "high": 45160.05,
+      "low": 44446.36,
       "bid": null,
       "ask": null,
       "priceKind": "last_trade",
       "isReferencePrice": false,
-      "sourceAt": "2026-08-19T03:24:40.000Z",
+      "sourceAt": "2026-08-20T03:16:00.000Z",
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_t00.tw",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-19T03:24:40.000Z",
-        "ageSeconds": 41,
-        "rawAgeSeconds": 41,
+        "sourceAt": "2026-08-20T03:16:00.000Z",
+        "ageSeconds": 32,
+        "rawAgeSeconds": 32,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -128,23 +128,23 @@
       "available": true,
       "price": null,
       "indicativePrice": null,
-      "previousClose": 34.81,
+      "previousClose": 33.96,
       "changePercent": null,
-      "actualOpen": 33.5,
-      "high": 34.15,
-      "low": 33.48,
-      "bid": 34.04,
-      "ask": 34.05,
+      "actualOpen": 34.36,
+      "high": 34.45,
+      "low": 33.69,
+      "bid": 33.94,
+      "ask": 33.95,
       "priceKind": "best_ask_reference",
       "isReferencePrice": true,
-      "sourceAt": "2026-08-19T03:24:39.000Z",
+      "sourceAt": "2026-08-20T03:15:59.000Z",
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_00631L.tw",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-19T03:24:39.000Z",
-        "ageSeconds": 42,
-        "rawAgeSeconds": 42,
+        "sourceAt": "2026-08-20T03:15:59.000Z",
+        "ageSeconds": 33,
+        "rawAgeSeconds": 33,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -154,9 +154,9 @@
   "overnight": {
     "TSM": {
       "available": true,
-      "price": 413.41,
-      "changePercent": -4.07,
-      "sourceAt": "2026-08-18T20:00:02.000Z",
+      "price": 412.09,
+      "changePercent": -0.32,
+      "sourceAt": "2026-08-19T20:00:02.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "TSM",
       "quoteType": "regular_market_quote",
@@ -165,9 +165,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-18T20:00:02.000Z",
-        "ageSeconds": 26719,
-        "rawAgeSeconds": 26719,
+        "sourceAt": "2026-08-19T20:00:02.000Z",
+        "ageSeconds": 26190,
+        "rawAgeSeconds": 26190,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -175,9 +175,9 @@
     },
     "SOX": {
       "available": true,
-      "price": 11992.463,
-      "changePercent": -4.98,
-      "sourceAt": "2026-08-18T21:15:59.000Z",
+      "price": 11738.226,
+      "changePercent": -2.12,
+      "sourceAt": "2026-08-19T21:15:59.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "^SOX",
       "quoteType": "regular_market_quote",
@@ -186,9 +186,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-18T21:15:59.000Z",
-        "ageSeconds": 22162,
-        "rawAgeSeconds": 22162,
+        "sourceAt": "2026-08-19T21:15:59.000Z",
+        "ageSeconds": 21633,
+        "rawAgeSeconds": 21633,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -212,9 +212,9 @@
     },
     "NVDA": {
       "available": true,
-      "price": 219.74,
-      "changePercent": -2.34,
-      "sourceAt": "2026-08-18T20:00:00.000Z",
+      "price": 217.56,
+      "changePercent": -0.99,
+      "sourceAt": "2026-08-19T20:00:00.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "NVDA",
       "quoteType": "regular_market_quote",
@@ -223,9 +223,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-18T20:00:00.000Z",
-        "ageSeconds": 26721,
-        "rawAgeSeconds": 26721,
+        "sourceAt": "2026-08-19T20:00:00.000Z",
+        "ageSeconds": 26192,
+        "rawAgeSeconds": 26192,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -233,9 +233,9 @@
     },
     "MU": {
       "available": true,
-      "price": 940.76,
-      "changePercent": -7.02,
-      "sourceAt": "2026-08-18T20:00:01.000Z",
+      "price": 937.105,
+      "changePercent": -0.39,
+      "sourceAt": "2026-08-19T20:00:01.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "MU",
       "quoteType": "regular_market_quote",
@@ -244,9 +244,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-18T20:00:01.000Z",
-        "ageSeconds": 26720,
-        "rawAgeSeconds": 26720,
+        "sourceAt": "2026-08-19T20:00:01.000Z",
+        "ageSeconds": 26191,
+        "rawAgeSeconds": 26191,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -288,255 +288,250 @@
   "futures": {
     "TX_DIRECTION": {
       "available": true,
-      "price": 44757,
-      "changePercent": -0.73,
-      "sourceAt": "2026-08-19T03:24:51.000Z",
+      "price": 44648,
+      "changePercent": 0.33,
+      "sourceAt": "2026-08-20T03:15:02.000Z",
       "source": "Yahoo Taiwan Stock WTX&",
       "sourceSymbol": "WTX&",
       "quoteType": "continuous_nearby_direction",
       "contractMonth": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-19T03:24:51.000Z",
-        "ageSeconds": 30,
-        "rawAgeSeconds": 30,
+        "sourceAt": "2026-08-20T03:15:02.000Z",
+        "ageSeconds": 90,
+        "rawAgeSeconds": 90,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
       }
     },
     "TX_FRONT_MONTH": {
-      "available": true,
-      "price": 44757,
+      "available": false,
+      "price": null,
       "bid": null,
       "ask": null,
-      "priceBasis": "last_or_reported_price",
-      "changePercent": -0.73,
-      "contractMonth": "202608",
-      "explicitContract": true,
-      "live": true,
-      "quoteType": "explicit_contract_live",
-      "sourceAt": "2026-08-19T03:24:51.000Z",
-      "source": "Yahoo Taiwan Stock WTXQ6",
-      "sourceSymbol": "WTXQ6",
+      "sourceAt": null,
+      "source": null,
       "freshness": {
-        "status": "fresh",
-        "sourceAt": "2026-08-19T03:24:51.000Z",
-        "ageSeconds": 30,
-        "rawAgeSeconds": 30,
-        "clockSkewClamped": false,
-        "maxAgeSeconds": 1800,
+        "status": "missing",
+        "sourceAt": null,
+        "ageSeconds": null,
+        "maxAgeSeconds": null,
         "basis": "sourceAt_or_updatedAt"
-      }
+      },
+      "reason": "daily_report_is_not_live_front_month",
+      "quoteType": "explicit_contract_live",
+      "contractMonth": null,
+      "explicitContract": false
     }
   },
   "intraday": {
     "firstHour": {
       "tradingDate": null,
-      "frozenAt": "2026-08-19T02:00:24.446Z",
-      "through": "2026-08-19T10:00:00+08:00",
+      "frozenAt": "2026-08-20T02:00:38.388Z",
+      "through": "2026-08-20T10:00:00+08:00",
       "symbols": {
         "0050": {
-          "open": 103.05,
-          "high": 103.85,
-          "low": 102.7,
-          "last": 103.75,
-          "rangePercent": 1.12,
+          "open": 104.2,
+          "high": 104.25,
+          "low": 103.2,
+          "last": 103.4,
+          "rangePercent": 1.02,
           "precision": "exchange_range_at_10_00"
         },
         "TAIEX": {
-          "open": 45071.34,
-          "high": 45071.34,
-          "low": 44308.71,
-          "last": 44784.68,
-          "rangePercent": 1.72,
+          "open": 44942.01,
+          "high": 45160.05,
+          "low": 44606.95,
+          "last": 44696.09,
+          "rangePercent": 1.24,
           "precision": "exchange_range_at_10_00"
         },
         "00631L": {
-          "open": 33.5,
-          "high": 34.15,
-          "low": 33.48,
-          "last": 34.09,
-          "rangePercent": 2,
+          "open": 34.36,
+          "high": 34.45,
+          "low": 33.9,
+          "last": 33.99,
+          "rangePercent": 1.62,
           "precision": "exchange_range_at_10_00"
         }
       }
     },
     "intradayWindow": {
-      "tradingDate": "2026-08-19",
-      "updatedAt": "2026-08-19T03:20:10.788Z",
+      "tradingDate": "2026-08-20",
+      "updatedAt": "2026-08-20T03:15:16.265Z",
       "cadenceSeconds": 300,
       "retentionMinutes": 90,
       "sampleCount": 19,
       "trend": {
-        "asOf": "2026-08-19T03:20:10.788Z",
+        "asOf": "2026-08-20T03:15:16.265Z",
         "sampleCount": 19,
         "symbols": {
           "0050": {
-            "from": "2026-08-19T01:55:07.932Z",
-            "to": "2026-08-19T03:20:10.788Z",
-            "firstPrice": 103.55,
-            "lastPrice": 103.65,
-            "priceChangePercent": 0.1,
-            "changePercentPoints": 0.1,
+            "from": "2026-08-20T01:50:07.183Z",
+            "to": "2026-08-20T03:15:16.265Z",
+            "firstPrice": 103.4,
+            "lastPrice": 103.3,
+            "priceChangePercent": -0.1,
+            "changePercentPoints": -0.1,
             "direction": "flat"
           },
           "TAIEX": {
-            "from": "2026-08-19T01:55:07.932Z",
-            "to": "2026-08-19T03:20:10.788Z",
-            "firstPrice": 44737.83,
-            "lastPrice": 44761.54,
-            "priceChangePercent": 0.05,
-            "changePercentPoints": 0.05,
-            "direction": "flat"
+            "from": "2026-08-20T01:50:07.183Z",
+            "to": "2026-08-20T03:15:16.265Z",
+            "firstPrice": 44686.69,
+            "lastPrice": 44596.93,
+            "priceChangePercent": -0.2,
+            "changePercentPoints": -0.2,
+            "direction": "falling"
           },
           "00631L": {
-            "from": "2026-08-19T01:55:07.932Z",
-            "to": "2026-08-19T03:20:10.788Z",
-            "firstPrice": 34.01,
-            "lastPrice": 34.09,
-            "priceChangePercent": 0.24,
-            "changePercentPoints": 0.23,
-            "direction": "rising"
+            "from": "2026-08-20T01:50:07.183Z",
+            "to": "2026-08-20T03:15:16.265Z",
+            "firstPrice": 34.02,
+            "lastPrice": 33.96,
+            "priceChangePercent": -0.18,
+            "changePercentPoints": -0.18,
+            "direction": "falling"
           }
         }
       }
     },
     "samples": [
       {
-        "at": "2026-08-19T02:55:24.527Z",
+        "at": "2026-08-20T02:50:11.024Z",
         "quotes": {
           "0050": {
-            "price": 103.4,
-            "changePercent": -1.43,
-            "sourceAt": "2026-08-19T02:54:54.000Z",
+            "price": 103.3,
+            "changePercent": 0.19,
+            "sourceAt": "2026-08-20T02:50:09.000Z",
             "freshness": "fresh"
           },
           "TAIEX": {
-            "price": 44668.32,
-            "changePercent": -1.41,
-            "sourceAt": "2026-08-19T02:54:45.000Z",
+            "price": 44596.31,
+            "changePercent": -0.28,
+            "sourceAt": "2026-08-20T02:50:00.000Z",
             "freshness": "fresh"
           },
           "00631L": {
-            "price": 33.93,
-            "changePercent": -2.53,
-            "sourceAt": "2026-08-19T02:54:44.000Z",
+            "price": 33.89,
+            "changePercent": -0.21,
+            "sourceAt": "2026-08-20T02:49:59.000Z",
             "freshness": "fresh"
           }
         }
       },
       {
-        "at": "2026-08-19T03:00:30.131Z",
+        "at": "2026-08-20T02:55:08.369Z",
         "quotes": {
           "0050": {
-            "price": 103.55,
-            "changePercent": -1.29,
-            "sourceAt": "2026-08-19T03:00:24.000Z",
+            "price": 103,
+            "changePercent": -0.1,
+            "sourceAt": "2026-08-20T02:54:29.000Z",
             "freshness": "fresh"
           },
           "TAIEX": {
-            "price": 44703.47,
-            "changePercent": -1.34,
-            "sourceAt": "2026-08-19T03:00:20.000Z",
+            "price": 44505.25,
+            "changePercent": -0.48,
+            "sourceAt": "2026-08-20T02:54:40.000Z",
             "freshness": "fresh"
           },
           "00631L": {
-            "price": 34,
-            "changePercent": -2.33,
-            "sourceAt": "2026-08-19T03:00:19.000Z",
+            "price": 33.79,
+            "changePercent": -0.5,
+            "sourceAt": "2026-08-20T02:54:54.000Z",
             "freshness": "fresh"
           }
         }
       },
       {
-        "at": "2026-08-19T03:05:06.454Z",
+        "at": "2026-08-20T03:01:21.900Z",
         "quotes": {
           "0050": {
-            "price": 103.6,
-            "changePercent": -1.24,
-            "sourceAt": "2026-08-19T03:04:49.000Z",
+            "price": 103.3,
+            "changePercent": 0.19,
+            "sourceAt": "2026-08-20T03:01:03.000Z",
             "freshness": "fresh"
           },
           "TAIEX": {
-            "price": 44736.23,
-            "changePercent": -1.26,
-            "sourceAt": "2026-08-19T03:05:00.000Z",
+            "price": 44583.49,
+            "changePercent": -0.3,
+            "sourceAt": "2026-08-20T03:00:35.000Z",
             "freshness": "fresh"
           },
           "00631L": {
-            "price": 34.05,
-            "changePercent": -2.18,
-            "sourceAt": "2026-08-19T03:04:58.000Z",
+            "price": 33.95,
+            "changePercent": -0.03,
+            "sourceAt": "2026-08-20T03:00:24.000Z",
             "freshness": "fresh"
           }
         }
       },
       {
-        "at": "2026-08-19T03:10:08.756Z",
+        "at": "2026-08-20T03:05:12.728Z",
         "quotes": {
           "0050": {
-            "price": 103.55,
-            "changePercent": -1.29,
-            "sourceAt": "2026-08-19T03:09:59.000Z",
+            "price": 103.35,
+            "changePercent": 0.24,
+            "sourceAt": "2026-08-20T03:04:44.000Z",
             "freshness": "fresh"
           },
           "TAIEX": {
-            "price": 44723.57,
-            "changePercent": -1.29,
-            "sourceAt": "2026-08-19T03:10:00.000Z",
+            "price": 44650.12,
+            "changePercent": -0.15,
+            "sourceAt": "2026-08-20T03:05:00.000Z",
             "freshness": "fresh"
           },
           "00631L": {
-            "price": 34,
-            "changePercent": -2.33,
-            "sourceAt": "2026-08-19T03:09:59.000Z",
+            "price": 33.99,
+            "changePercent": 0.09,
+            "sourceAt": "2026-08-20T03:04:49.000Z",
             "freshness": "fresh"
           }
         }
       },
       {
-        "at": "2026-08-19T03:15:15.979Z",
+        "at": "2026-08-20T03:10:09.705Z",
         "quotes": {
           "0050": {
-            "price": 103.5,
-            "changePercent": -1.33,
-            "sourceAt": "2026-08-19T03:14:54.000Z",
+            "price": 103.3,
+            "changePercent": 0.19,
+            "sourceAt": "2026-08-20T03:09:59.000Z",
             "freshness": "fresh"
           },
           "TAIEX": {
-            "price": 44697.94,
-            "changePercent": -1.35,
-            "sourceAt": "2026-08-19T03:15:10.000Z",
+            "price": 44600.1,
+            "changePercent": -0.27,
+            "sourceAt": "2026-08-20T03:10:05.000Z",
             "freshness": "fresh"
           },
           "00631L": {
-            "price": 34.05,
-            "changePercent": -2.18,
-            "sourceAt": "2026-08-19T03:15:14.000Z",
+            "price": 33.96,
+            "changePercent": 0,
+            "sourceAt": "2026-08-20T03:09:59.000Z",
             "freshness": "fresh"
           }
         }
       },
       {
-        "at": "2026-08-19T03:20:10.788Z",
+        "at": "2026-08-20T03:15:16.265Z",
         "quotes": {
           "0050": {
-            "price": 103.65,
-            "changePercent": -1.19,
-            "sourceAt": "2026-08-19T03:19:59.000Z",
+            "price": 103.3,
+            "changePercent": 0.19,
+            "sourceAt": "2026-08-20T03:15:09.000Z",
             "freshness": "fresh"
           },
           "TAIEX": {
-            "price": 44761.54,
-            "changePercent": -1.21,
-            "sourceAt": "2026-08-19T03:20:00.000Z",
+            "price": 44596.93,
+            "changePercent": -0.27,
+            "sourceAt": "2026-08-20T03:14:50.000Z",
             "freshness": "fresh"
           },
           "00631L": {
-            "price": 34.09,
-            "changePercent": -2.07,
-            "sourceAt": "2026-08-19T03:19:59.000Z",
+            "price": 33.96,
+            "changePercent": 0,
+            "sourceAt": "2026-08-20T03:14:44.000Z",
             "freshness": "fresh"
           }
         }
@@ -544,49 +539,51 @@
     ],
     "coverage": {
       "firstHour": {
-        "2330": "structurally_unavailable_from_source",
+        "2330": "missing",
         "0050": "available",
         "TAIEX": "available",
         "00631L": "available"
       },
       "samples": {
-        "2330": "structurally_unavailable_from_source",
+        "2330": "missing",
         "0050": "available",
         "TAIEX": "available",
         "00631L": "available"
       }
     },
-    "sourceLimitations": [
-      "intraday.2330_not_sampled_by_source"
-    ]
+    "sourceLimitations": []
   },
   "freshnessSummary": {
     "basis": "sourceAt_or_updatedAt_only",
     "fetchedAtIsFreshnessEvidence": false,
     "testMode": false,
     "counts": {
-      "fresh": 10,
+      "fresh": 9,
       "stale": 0,
-      "missing": 3,
+      "missing": 4,
       "invalid": 0
     },
-    "oldestSourceAt": "2026-08-18T20:00:00.000Z",
-    "newestSourceAt": "2026-08-19T03:24:51.000Z",
-    "quality": "downgraded",
-    "qualityReasons": [
-      "intraday.2330_not_sampled_by_source"
-    ]
+    "oldestSourceAt": "2026-08-19T20:00:00.000Z",
+    "newestSourceAt": "2026-08-20T03:16:00.000Z",
+    "quality": "degraded",
+    "qualityReasons": []
   },
-  "missingRequired": [],
+  "missingRequired": [
+    "spot.0050.current_last_trade",
+    "spot.2330.current_last_trade",
+    "intraday.firstHour.2330",
+    "intraday.intradayWindow.samples.2330"
+  ],
   "missingOptional": [
-    "spot.00631L.current_last_trade"
+    "spot.00631L.current_last_trade",
+    "futures.TX_FRONT_MONTH"
   ],
   "errors": [],
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-19T03:24:58.218Z",
-    "evaluatedAt": "2026-08-19T03:25:20.693Z",
+    "startedAt": "2026-08-20T03:15:02.611Z",
+    "evaluatedAt": "2026-08-20T03:16:31.932Z",
     "sourceSchemas": {
       "health": "degraded",
       "marketData": "1.1",
