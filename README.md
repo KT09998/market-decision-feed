@@ -27,8 +27,10 @@ Payloads are capped at 64 KiB. The 10:30 output keeps only a compact first-hour 
 
 - Freshness is recomputed from source `sourceAt`, falling back only to source `updatedAt`, using `collection.evaluatedAt` after all API retries finish. `collection.startedAt` remains the run-start reference for stage gates and target-date selection; a new bridge `generatedAt` or upstream `fetchedAt` cannot make an old quote fresh.
 - `market-snapshot` is the primary spot source. `market-data` is a fallback. A quote's `open` is never substituted for a missing current price, and zero is treated as unavailable rather than a trade.
+- Normalized quotes retain `sourceAt`, raw `updatedAt`, and `sourceTimeBasis` (`sourceAt` or `updatedAt`) so a fallback timestamp is visible rather than silently treated as a new quote.
+- Stage gates are enforced in Asia/Taipei: 23:55, 08:45, and 10:27 are warm-up runs only. `collection.startedAt` must be at or after 00:00:00, 08:50:00, or 10:30:00 respectively for a formal `READY`; a retry that finishes after the gate cannot turn a pre-gate warm-up into `READY`. A prior `READY` is reused only when its `collection.startedAt` (or legacy `generatedAt`/`asOf`) is also after that stage gate.
+- In addition to HTTP/JSON retries, the collector re-fetches a bounded three-attempt source bundle when a 200 response is semantically incomplete for the requested stage (for example, 10:30 core quotes are still reference prices or the current intraday window is not ready). Freshness and stage gates are evaluated only after the final attempt.
 - At 08:50, `actualOpen` is always `null`. A pre-open or reference observation may be retained separately, but it is not called the actual open.
-- Stage gates are enforced in Asia/Taipei: 23:57, 08:47, and 10:27 are warm-up runs only. `collection.startedAt` must be at or after 00:00:00, 08:50:00, or 10:30:00 respectively for a formal `READY`; a retry that finishes after the gate cannot turn a pre-gate warm-up into `READY`. A prior `READY` is reused only when its `collection.startedAt` (or legacy `generatedAt`/`asOf`) is also after that stage gate.
 - At 10:30, `0050`, `2330`, and `TAIEX` must each have a current-date, fresh, non-reference `last_trade`. Current-target-date `firstHour` and `intradayWindow` are required; `0050` and `TAIEX` must have both first-hour and recent-sample coverage. If the verified raw source provides no `2330` in either intraday location while top-level `2330` is fresh, the payload records `intraday.coverage.firstHour.2330` and `intraday.coverage.samples.2330` as `structurally_unavailable_from_source`, adds `intraday.2330_not_sampled_by_source` to `intraday.sourceLimitations` and `freshnessSummary.qualityReasons`, and may be `READY` only with `freshnessSummary.quality = "downgraded"`. No first-hour value is fabricated; if the source later provides `2330`, the real values are retained and the limitation disappears. `00631L` remains optional and is reported as unavailable when absent.
 - `TX_DIRECTION` accepts only `continuous_nearby_direction` data and always has `contractMonth: null`.
 - `TX_FRONT_MONTH` requires `explicitContract: true`, a `YYYYMM` contract month, `quoteType: explicit_contract_live`, `live: true`, source time, source name, freshness, and a reported price or bid/ask. A TAIFEX daily report or continuous-nearby quote is rejected. Bid/ask-only data stays bid/ask-only; no midpoint is invented.
@@ -54,9 +56,9 @@ The workflow also supports manual dispatch with a selectable stage and `test_mod
 
 Scheduled UTC cron entries correspond to:
 
-- Asia/Taipei 23:57, 00:03, 00:08 for stage `0000`.
-- Weekdays 08:47, 08:52, 08:57 for stage `0850`.
-- Weekdays 10:27, 10:32, 10:37, 10:42 for stage `1030`.
+- Asia/Taipei 23:55, 00:01, 00:06 for stage `0000`.
+- Weekdays 08:45, 08:50, 08:55 for stage `0850`.
+- Weekdays 10:27, 10:30, 10:35, 10:40 for stage `1030`.
 
 Fallback runs exit early when a structurally valid `READY` latest already exists for the same `targetDate` and stage. Taiwan market holidays are not encoded in cron; the data gates decide whether an observation is acceptable.
 

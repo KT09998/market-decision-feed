@@ -18,19 +18,19 @@ on:
         type: boolean
         default: true
   schedule:
-    # Asia/Taipei 23:57, 00:03, 00:08 (UTC cron; the first run targets the next Taipei date).
-    - cron: "57 15 * * *"
-    - cron: "3 16 * * *"
-    - cron: "8 16 * * *"
-    # Weekdays at Asia/Taipei 08:47, 08:52, 08:57.
-    - cron: "47 0 * * 1-5"
-    - cron: "52 0 * * 1-5"
-    - cron: "57 0 * * 1-5"
-    # Weekdays at Asia/Taipei 10:27, 10:32, 10:37, 10:42.
+    # Asia/Taipei 23:55, 00:01, 00:06 (UTC cron; the first run targets the next Taipei date).
+    - cron: "55 15 * * *"
+    - cron: "1 16 * * *"
+    - cron: "6 16 * * *"
+    # Weekdays at Asia/Taipei 08:45, 08:50, 08:55.
+    - cron: "45 0 * * 1-5"
+    - cron: "50 0 * * 1-5"
+    - cron: "55 0 * * 1-5"
+    # Weekdays at Asia/Taipei 10:27, 10:30, 10:35, 10:40.
     - cron: "27 2 * * 1-5"
-    - cron: "32 2 * * 1-5"
-    - cron: "37 2 * * 1-5"
-    - cron: "42 2 * * 1-5"
+    - cron: "30 2 * * 1-5"
+    - cron: "35 2 * * 1-5"
+    - cron: "40 2 * * 1-5"
 
 permissions:
   contents: write
@@ -68,9 +68,9 @@ jobs:
           else
             test_mode="false"
             case "$SCHEDULE" in
-              "57 15 * * *"|"3 16 * * *"|"8 16 * * *") stage="0000" ;;
-              "47 0 * * 1-5"|"52 0 * * 1-5"|"57 0 * * 1-5") stage="0850" ;;
-              "27 2 * * 1-5"|"32 2 * * 1-5"|"37 2 * * 1-5"|"42 2 * * 1-5") stage="1030" ;;
+              "55 15 * * *"|"1 16 * * *"|"6 16 * * *") stage="0000" ;;
+              "45 0 * * 1-5"|"50 0 * * 1-5"|"55 0 * * 1-5") stage="0850" ;;
+              "27 2 * * 1-5"|"30 2 * * 1-5"|"35 2 * * 1-5"|"40 2 * * 1-5") stage="1030" ;;
               *) echo "Unknown schedule: $SCHEDULE" >&2; exit 1 ;;
             esac
           fi

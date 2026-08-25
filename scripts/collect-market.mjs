@@ -120,6 +120,12 @@ function sourceTimestamp(value) {
   return value?.freshness?.sourceAt ?? value?.sourceAt ?? value?.updatedAt ?? null;
 }
 
+function sourceTimeBasis(value) {
+  if (value?.freshness?.sourceAt || value?.sourceAt) return "sourceAt";
+  if (value?.updatedAt) return "updatedAt";
+  return null;
+}
+
 
 function assessFreshness(sourceAt, now, maxAgeSeconds) {
   if (!sourceAt) return { status: "missing", sourceAt: null, ageSeconds: null, maxAgeSeconds, basis: "sourceAt_or_updatedAt" };
@@ -188,6 +194,8 @@ function unavailable(reason) {
     bid: null,
     ask: null,
     sourceAt: null,
+    updatedAt: null,
+    sourceTimeBasis: null,
     source: null,
     freshness: { status: "missing", sourceAt: null, ageSeconds: null, maxAgeSeconds: null, basis: "sourceAt_or_updatedAt" },
     reason,
@@ -238,6 +246,8 @@ function normalizeSpot(symbol, snapshot, marketQuotes, stage, evaluatedAt) {
     sourceAt: freshness.sourceAt,
     source: selected.source ?? (isSnapshot ? snapshot.source : null),
     sourceSymbol: selected.sourceChannel ?? selected.sourceSymbol ?? null,
+    updatedAt: selected.updatedAt ?? null,
+    sourceTimeBasis: sourceTimeBasis(selected),
     freshness,
   };
 }
@@ -257,6 +267,8 @@ function normalizeOvernight(symbol, marketQuotes, evaluatedAt) {
     sourceAt: freshness.sourceAt,
     source: quote.source ?? null,
     sourceSymbol: quote.sourceSymbol ?? null,
+    updatedAt: quote.updatedAt ?? null,
+    sourceTimeBasis: sourceTimeBasis(quote),
     quoteType: "regular_market_quote",
     completedSession: isCompletedSessionQuote(quote),
     session: quote.session ?? quote.sessionStatus ?? null,
@@ -280,6 +292,8 @@ function normalizeDirection(marketQuotes, evaluatedAt) {
     sourceAt: freshness.sourceAt,
     source: quote.source ?? null,
     sourceSymbol: quote.sourceSymbol ?? null,
+    updatedAt: quote.updatedAt ?? null,
+    sourceTimeBasis: sourceTimeBasis(quote),
     quoteType: "continuous_nearby_direction",
     contractMonth: null,
     freshness,
@@ -325,6 +339,8 @@ function normalizeFrontMonth(marketQuotes, evaluatedAt) {
     live: true,
     quoteType: "explicit_contract_live",
     sourceAt: validation.freshness.sourceAt,
+    updatedAt: quote.updatedAt ?? null,
+    sourceTimeBasis: sourceTimeBasis(quote),
     source: quote.source,
     sourceSymbol: quote.sourceSymbol ?? null,
     freshness: validation.freshness,
@@ -644,10 +660,74 @@ function isReasonableReady(payload, stage, targetDate) {
     stageWindowOpen(stage, targetDate, stageReference);
 }
 
+function responseQuoteCandidates(snapshot, marketData, symbol) {
+  const fallback = Array.isArray(marketData?.quotes) ? marketData.quotes.find((quote) => quote?.symbol === symbol) : null;
+  return [snapshot?.quotes?.[symbol], fallback].filter(isObject);
+}
+
+function sourceDateIsTarget(value, targetDate) {
+  const sourceAt = sourceTimestamp(value);
+  const date = sourceAt ? new Date(sourceAt) : null;
+  return date && Number.isFinite(date.getTime()) && dateInTaipei(date) === targetDate;
+}
+
+function hasSpotObservation(snapshot, marketData, symbol, targetDate, requireTrade) {
+  return responseQuoteCandidates(snapshot, marketData, symbol).some((quote) => {
+    const price = positiveNumber(quote.price ?? quote.close);
+    const bid = compactArray(quote.bestBid ?? [quote.bid])[0] ?? null;
+    const ask = compactArray(quote.bestAsk ?? [quote.ask])[0] ?? null;
+    const observed = price !== null || bid !== null || ask !== null;
+    const isTrade = price !== null && quote.priceKind === "last_trade" && quote.isReferencePrice !== true;
+    return observed && (!requireTrade || isTrade) && sourceDateIsTarget(quote, targetDate);
+  });
+}
+
+function intradaySourceReady(snapshot, targetDate) {
+  const window = snapshot?.intradayWindow;
+  if (!isObject(window) || window.tradingDate !== targetDate) return false;
+  const firstHour = window.firstHour;
+  const firstHourThrough = firstHour?.through ? new Date(firstHour.through) : null;
+  const firstHourDate = firstHourThrough && Number.isFinite(firstHourThrough.getTime()) ? dateInTaipei(firstHourThrough) : firstHour?.tradingDate ?? null;
+  if (firstHourDate !== targetDate || !firstHour?.symbols?.["0050"] || !firstHour?.symbols?.TAIEX) return false;
+  const samples = (Array.isArray(window.samples) ? window.samples : []).filter((sample) => {
+    const at = sample?.at ? new Date(sample.at) : null;
+    return at && Number.isFinite(at.getTime()) && dateInTaipei(at) === targetDate;
+  });
+  return samples.some((sample) => sample?.quotes?.["0050"] && sample?.quotes?.TAIEX);
+}
+
+function sourceBundleNeedsRetry(stage, responses, targetDate) {
+  if (Object.values(responses).some((result) => result.error)) return true;
+  const snapshot = responses.snapshot.data;
+  const marketData = responses.marketData.data;
+  if (stage === "1030") {
+    return CORE_SPOT.some((symbol) => !hasSpotObservation(snapshot, marketData, symbol, targetDate, true)) ||
+      !intradaySourceReady(snapshot, targetDate);
+  }
+  if (stage === "0850") {
+    return CORE_SPOT.some((symbol) => !hasSpotObservation(snapshot, marketData, symbol, targetDate, false));
+  }
+  const quotes = quoteMap(marketData);
+  return !quotes.has("TSM") || (!quotes.has("SOX") && !quotes.has("QQQ"));
+}
+
+async function fetchSourceBundle(stage, startedAt) {
+  const delays = [0, 15_000, 30_000];
+  const targetDate = targetDateFor(stage, startedAt);
+  let responses = {};
+  for (let attempt = 0; attempt < delays.length; attempt += 1) {
+    if (delays[attempt] > 0) await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+    const results = await Promise.all(Object.entries(ENDPOINTS).map(async ([name, url]) => [name, await fetchJson(name, url, { delays: [0] })]));
+    responses = Object.fromEntries(results);
+    if (attempt === delays.length - 1 || !sourceBundleNeedsRetry(stage, responses, targetDate)) return responses;
+    console.warn(`Source payload not ready for stage=${stage} targetDate=${targetDate}; semantic retry ${attempt + 2}/${delays.length}`);
+  }
+  return responses;
+}
+
 async function buildPayload(stage, testMode, startedAt = new Date()) {
-  const results = await Promise.all(Object.entries(ENDPOINTS).map(async ([name, url]) => [name, await fetchJson(name, url)]));
+  const responses = await fetchSourceBundle(stage, startedAt);
   const evaluatedAt = new Date();
-  const responses = Object.fromEntries(results);
   const fetchErrors = Object.values(responses).map((result) => result.error).filter(Boolean);
   const marketData = responses.marketData.data;
   const snapshot = responses.snapshot.data;
@@ -755,6 +835,30 @@ async function runSelfTest() {
     };
   };
   const now = new Date("2026-08-15T02:30:00.000Z");
+  const semanticSnapshot = {
+    quotes: Object.fromEntries(CORE_SPOT.map((symbol) => [symbol, {
+      price: 100,
+      priceKind: "last_trade",
+      isReferencePrice: false,
+      updatedAt: "2026-08-15T02:30:00.000Z",
+    }])),
+    intradayWindow: {
+      tradingDate: "2026-08-15",
+      firstHour: {
+        through: "2026-08-15T10:00:00+08:00",
+        symbols: { "0050": {}, TAIEX: {} },
+      },
+      samples: [{ at: "2026-08-15T02:30:00.000Z", quotes: { "0050": {}, TAIEX: {} } }],
+    },
+  };
+  const semanticMarketData = { quotes: [] };
+  const semanticResponses = { snapshot: { data: semanticSnapshot, error: null }, marketData: { data: semanticMarketData, error: null }, health: { data: {}, error: null } };
+  assert(!sourceBundleNeedsRetry("1030", semanticResponses, "2026-08-15"), "complete semantic source bundle requested an unnecessary retry");
+  const referenceResponses = structuredClone(semanticResponses);
+  referenceResponses.snapshot.data.quotes["2330"].priceKind = "best_ask_reference";
+  referenceResponses.snapshot.data.quotes["2330"].isReferencePrice = true;
+  assert(sourceBundleNeedsRetry("1030", referenceResponses, "2026-08-15"), "reference-only core quote did not request a semantic retry");
+
   assert(assessFreshness("2020-01-01T00:00:00.000Z", now, 600).status === "stale", "old sourceAt became fresh");
   assert(assessFreshness(null, now, 600).status === "missing", "missing sourceAt did not stay missing");
   const sourceBeforeEvaluation = assessFreshness("2026-08-14T19:32:16.000Z", new Date("2026-08-14T19:32:24.000Z"), 1_800);
