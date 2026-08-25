@@ -18,9 +18,10 @@ on:
         type: boolean
         default: true
   schedule:
-    # Asia/Taipei 23:55, 00:01, 00:06 (UTC cron; the first run targets the next Taipei date).
-    - cron: "55 15 * * *"
-    - cron: "1 16 * * *"
+    # Asia/Taipei 23:40, 23:50, 23:58, 00:06 (UTC cron; the first three runs target the next Taipei date).
+    - cron: "40 15 * * *"
+    - cron: "50 15 * * *"
+    - cron: "58 15 * * *"
     - cron: "6 16 * * *"
     # Weekdays at Asia/Taipei 08:45, 08:50, 08:55.
     - cron: "45 0 * * 1-5"
@@ -68,7 +69,7 @@ jobs:
           else
             test_mode="false"
             case "$SCHEDULE" in
-              "55 15 * * *"|"1 16 * * *"|"6 16 * * *") stage="0000" ;;
+              "40 15 * * *"|"50 15 * * *"|"58 15 * * *"|"6 16 * * *") stage="0000" ;;
               "45 0 * * 1-5"|"50 0 * * 1-5"|"55 0 * * 1-5") stage="0850" ;;
               "27 2 * * 1-5"|"30 2 * * 1-5"|"35 2 * * 1-5"|"40 2 * * 1-5") stage="1030" ;;
               *) echo "Unknown schedule: $SCHEDULE" >&2; exit 1 ;;
