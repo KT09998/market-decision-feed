@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "stage": "1030",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-26T03:30:52.388Z",
+  "generatedAt": "2026-08-26T03:34:05.706Z",
   "targetDate": "2026-08-26",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
@@ -13,10 +13,37 @@
     }
   },
   "marketHealth": {
-    "available": false,
-    "status": "unavailable",
-    "checkedAt": null,
-    "components": {}
+    "available": true,
+    "ok": true,
+    "status": "degraded",
+    "checkedAt": "2026-08-26T03:34:05.677Z",
+    "session": "open",
+    "components": {
+      "marketData": {
+        "ok": true,
+        "httpStatus": 200,
+        "mode": "live",
+        "sourceAt": null,
+        "sampleCount": null,
+        "firstHourReady": null
+      },
+      "marketSnapshot": {
+        "ok": true,
+        "httpStatus": 200,
+        "mode": "live",
+        "sourceAt": null,
+        "sampleCount": null,
+        "firstHourReady": null
+      },
+      "intradaySampler": {
+        "ok": true,
+        "httpStatus": null,
+        "mode": null,
+        "sourceAt": "2026-08-26T03:30:12.540Z",
+        "sampleCount": 19,
+        "firstHourReady": true
+      }
+    }
   },
   "spot": {
     "2330": {
@@ -32,16 +59,16 @@
       "ask": 2420,
       "priceKind": "best_ask_reference",
       "isReferencePrice": true,
-      "sourceAt": "2026-08-26T03:30:45.000Z",
+      "sourceAt": "2026-08-26T03:32:35.000Z",
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_2330.tw",
-      "updatedAt": "2026-08-26T11:30:45+08:00",
+      "updatedAt": "2026-08-26T11:32:35+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-26T03:30:45.000Z",
-        "ageSeconds": 7,
-        "rawAgeSeconds": 7,
+        "sourceAt": "2026-08-26T03:32:35.000Z",
+        "ageSeconds": 91,
+        "rawAgeSeconds": 91,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -60,16 +87,16 @@
       "ask": 105.9,
       "priceKind": "best_ask_reference",
       "isReferencePrice": true,
-      "sourceAt": "2026-08-26T03:30:44.000Z",
+      "sourceAt": "2026-08-26T03:32:39.000Z",
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_0050.tw",
-      "updatedAt": "2026-08-26T11:30:44+08:00",
+      "updatedAt": "2026-08-26T11:32:39+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-26T03:30:44.000Z",
-        "ageSeconds": 8,
-        "rawAgeSeconds": 8,
+        "sourceAt": "2026-08-26T03:32:39.000Z",
+        "ageSeconds": 87,
+        "rawAgeSeconds": 87,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -77,7 +104,7 @@
     },
     "TAIEX": {
       "available": true,
-      "price": 45758.03,
+      "price": 45754.48,
       "indicativePrice": null,
       "previousClose": 45169.46,
       "changePercent": 1.3,
@@ -88,16 +115,16 @@
       "ask": null,
       "priceKind": "last_trade",
       "isReferencePrice": false,
-      "sourceAt": "2026-08-26T03:30:45.000Z",
+      "sourceAt": "2026-08-26T03:32:35.000Z",
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_t00.tw",
-      "updatedAt": "2026-08-26T11:30:45+08:00",
+      "updatedAt": "2026-08-26T11:32:35+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-26T03:30:45.000Z",
-        "ageSeconds": 7,
-        "rawAgeSeconds": 7,
+        "sourceAt": "2026-08-26T03:32:35.000Z",
+        "ageSeconds": 91,
+        "rawAgeSeconds": 91,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -112,20 +139,20 @@
       "actualOpen": 34.54,
       "high": 35.77,
       "low": 34.44,
-      "bid": 35.67,
-      "ask": 35.69,
+      "bid": 35.66,
+      "ask": 35.67,
       "priceKind": "best_ask_reference",
       "isReferencePrice": true,
-      "sourceAt": "2026-08-26T03:30:44.000Z",
+      "sourceAt": "2026-08-26T03:32:39.000Z",
       "source": "TWSE MIS official intraday quotes",
       "sourceSymbol": "tse_00631L.tw",
-      "updatedAt": "2026-08-26T11:30:44+08:00",
+      "updatedAt": "2026-08-26T11:32:39+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-26T03:30:44.000Z",
-        "ageSeconds": 8,
-        "rawAgeSeconds": 8,
+        "sourceAt": "2026-08-26T03:32:39.000Z",
+        "ageSeconds": 87,
+        "rawAgeSeconds": 87,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -149,8 +176,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-25T20:00:02.000Z",
-        "ageSeconds": 27050,
-        "rawAgeSeconds": 27050,
+        "ageSeconds": 27244,
+        "rawAgeSeconds": 27244,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -172,8 +199,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-25T21:15:59.000Z",
-        "ageSeconds": 22493,
-        "rawAgeSeconds": 22493,
+        "ageSeconds": 22687,
+        "rawAgeSeconds": 22687,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -213,8 +240,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-25T20:00:00.000Z",
-        "ageSeconds": 27052,
-        "rawAgeSeconds": 27052,
+        "ageSeconds": 27246,
+        "rawAgeSeconds": 27246,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -236,8 +263,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-25T20:00:01.000Z",
-        "ageSeconds": 27051,
-        "rawAgeSeconds": 27051,
+        "ageSeconds": 27245,
+        "rawAgeSeconds": 27245,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -283,20 +310,20 @@
   "futures": {
     "TX_DIRECTION": {
       "available": true,
-      "price": 45829,
-      "changePercent": 1.77,
-      "sourceAt": "2026-08-26T03:30:09.000Z",
+      "price": 45849,
+      "changePercent": 1.81,
+      "sourceAt": "2026-08-26T03:32:50.000Z",
       "source": "Yahoo Taiwan Stock WTX&",
       "sourceSymbol": "WTX&",
-      "updatedAt": "2026-08-26T03:30:09.000Z",
+      "updatedAt": "2026-08-26T03:32:50.000Z",
       "sourceTimeBasis": "sourceAt",
       "quoteType": "continuous_nearby_direction",
       "contractMonth": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-26T03:30:09.000Z",
-        "ageSeconds": 43,
-        "rawAgeSeconds": 43,
+        "sourceAt": "2026-08-26T03:32:50.000Z",
+        "ageSeconds": 76,
+        "rawAgeSeconds": 76,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -304,25 +331,25 @@
     },
     "TX_FRONT_MONTH": {
       "available": true,
-      "price": 45829,
+      "price": 45847,
       "bid": null,
       "ask": null,
       "priceBasis": "last_or_reported_price",
-      "changePercent": 1.77,
+      "changePercent": 1.81,
       "contractMonth": "202609",
       "explicitContract": true,
       "live": true,
       "quoteType": "explicit_contract_live",
-      "sourceAt": "2026-08-26T03:30:09.000Z",
-      "updatedAt": "2026-08-26T03:30:09.000Z",
+      "sourceAt": "2026-08-26T03:32:51.000Z",
+      "updatedAt": "2026-08-26T03:32:51.000Z",
       "sourceTimeBasis": "sourceAt",
       "source": "Yahoo Taiwan Stock WTXU6",
       "sourceSymbol": "WTXU6",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-26T03:30:09.000Z",
-        "ageSeconds": 43,
-        "rawAgeSeconds": 43,
+        "sourceAt": "2026-08-26T03:32:51.000Z",
+        "ageSeconds": 75,
+        "rawAgeSeconds": 75,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -568,7 +595,7 @@
       "invalid": 0
     },
     "oldestSourceAt": "2026-08-25T20:00:00.000Z",
-    "newestSourceAt": "2026-08-26T03:30:45.000Z",
+    "newestSourceAt": "2026-08-26T03:32:51.000Z",
     "quality": "degraded",
     "qualityReasons": []
   },
@@ -579,22 +606,16 @@
     "intraday.intradayWindow.samples.2330"
   ],
   "missingOptional": [
-    "marketHealth",
     "spot.00631L.current_last_trade"
   ],
-  "errors": [
-    {
-      "source": "public_api",
-      "message": "health: fetch failed"
-    }
-  ],
+  "errors": [],
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-26T03:29:43.393Z",
-    "evaluatedAt": "2026-08-26T03:30:52.388Z",
+    "startedAt": "2026-08-26T03:32:46.593Z",
+    "evaluatedAt": "2026-08-26T03:34:05.706Z",
     "sourceSchemas": {
-      "health": null,
+      "health": "degraded",
       "marketData": "1.1",
       "snapshot": "1.1"
     }
