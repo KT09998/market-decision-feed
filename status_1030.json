@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "stage": "1030",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-28T14:32:42.965Z",
+  "generatedAt": "2026-08-28T14:34:41.849Z",
   "targetDate": "2026-08-28",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "healthy",
-    "checkedAt": "2026-08-28T14:32:42.940Z",
+    "checkedAt": "2026-08-28T14:34:41.807Z",
     "session": "closed",
     "components": {
       "marketData": {
@@ -67,8 +67,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 32563,
-        "rawAgeSeconds": 32563,
+        "ageSeconds": 32682,
+        "rawAgeSeconds": 32682,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -95,8 +95,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 32563,
-        "rawAgeSeconds": 32563,
+        "ageSeconds": 32682,
+        "rawAgeSeconds": 32682,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -123,8 +123,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:33:00.000Z",
-        "ageSeconds": 32383,
-        "rawAgeSeconds": 32383,
+        "ageSeconds": 32502,
+        "rawAgeSeconds": 32502,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -151,8 +151,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 32563,
-        "rawAgeSeconds": 32563,
+        "ageSeconds": 32682,
+        "rawAgeSeconds": 32682,
         "clockSkewClamped": false,
         "maxAgeSeconds": 600,
         "basis": "sourceAt_or_updatedAt"
@@ -162,12 +162,12 @@
   "overnight": {
     "TSM": {
       "available": true,
-      "price": 425.84,
-      "changePercent": -0.34,
-      "sourceAt": "2026-08-28T14:31:12.000Z",
+      "price": 426.295,
+      "changePercent": -0.24,
+      "sourceAt": "2026-08-28T14:34:18.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "TSM",
-      "updatedAt": "2026-08-28T14:31:12.000Z",
+      "updatedAt": "2026-08-28T14:34:18.000Z",
       "sourceTimeBasis": "sourceAt",
       "quoteType": "regular_market_quote",
       "completedSession": false,
@@ -175,9 +175,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T14:31:12.000Z",
-        "ageSeconds": 91,
-        "rawAgeSeconds": 91,
+        "sourceAt": "2026-08-28T14:34:18.000Z",
+        "ageSeconds": 24,
+        "rawAgeSeconds": 24,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -185,12 +185,12 @@
     },
     "SOX": {
       "available": true,
-      "price": 11725.43,
-      "changePercent": -1.32,
-      "sourceAt": "2026-08-28T14:31:13.000Z",
+      "price": 11746.539,
+      "changePercent": -1.14,
+      "sourceAt": "2026-08-28T14:34:16.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "^SOX",
-      "updatedAt": "2026-08-28T14:31:13.000Z",
+      "updatedAt": "2026-08-28T14:34:16.000Z",
       "sourceTimeBasis": "sourceAt",
       "quoteType": "regular_market_quote",
       "completedSession": false,
@@ -198,9 +198,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T14:31:13.000Z",
-        "ageSeconds": 90,
-        "rawAgeSeconds": 90,
+        "sourceAt": "2026-08-28T14:34:16.000Z",
+        "ageSeconds": 26,
+        "rawAgeSeconds": 26,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -226,12 +226,12 @@
     },
     "NVDA": {
       "available": true,
-      "price": 224.98,
-      "changePercent": -1.32,
-      "sourceAt": "2026-08-28T14:31:13.000Z",
+      "price": 225.145,
+      "changePercent": -1.24,
+      "sourceAt": "2026-08-28T14:34:18.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "NVDA",
-      "updatedAt": "2026-08-28T14:31:13.000Z",
+      "updatedAt": "2026-08-28T14:34:18.000Z",
       "sourceTimeBasis": "sourceAt",
       "quoteType": "regular_market_quote",
       "completedSession": false,
@@ -239,9 +239,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T14:31:13.000Z",
-        "ageSeconds": 90,
-        "rawAgeSeconds": 90,
+        "sourceAt": "2026-08-28T14:34:18.000Z",
+        "ageSeconds": 24,
+        "rawAgeSeconds": 24,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -249,12 +249,12 @@
     },
     "MU": {
       "available": true,
-      "price": 942.46,
-      "changePercent": 0.76,
-      "sourceAt": "2026-08-28T14:31:14.000Z",
+      "price": 945.64,
+      "changePercent": 1.1,
+      "sourceAt": "2026-08-28T14:34:18.000Z",
       "source": "Yahoo Finance chart",
       "sourceSymbol": "MU",
-      "updatedAt": "2026-08-28T14:31:14.000Z",
+      "updatedAt": "2026-08-28T14:34:18.000Z",
       "sourceTimeBasis": "sourceAt",
       "quoteType": "regular_market_quote",
       "completedSession": false,
@@ -262,9 +262,9 @@
       "marketState": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T14:31:14.000Z",
-        "ageSeconds": 89,
-        "rawAgeSeconds": 89,
+        "sourceAt": "2026-08-28T14:34:18.000Z",
+        "ageSeconds": 24,
+        "rawAgeSeconds": 24,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -310,20 +310,20 @@
   "futures": {
     "TX_DIRECTION": {
       "available": true,
-      "price": 46424,
-      "changePercent": 0.14,
-      "sourceAt": "2026-08-28T14:31:13.000Z",
+      "price": 46467,
+      "changePercent": 0.24,
+      "sourceAt": "2026-08-28T14:34:18.000Z",
       "source": "Yahoo Taiwan Stock WTX&",
       "sourceSymbol": "WTX&",
-      "updatedAt": "2026-08-28T14:31:13.000Z",
+      "updatedAt": "2026-08-28T14:34:18.000Z",
       "sourceTimeBasis": "sourceAt",
       "quoteType": "continuous_nearby_direction",
       "contractMonth": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T14:31:13.000Z",
-        "ageSeconds": 90,
-        "rawAgeSeconds": 90,
+        "sourceAt": "2026-08-28T14:34:18.000Z",
+        "ageSeconds": 24,
+        "rawAgeSeconds": 24,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -331,25 +331,25 @@
     },
     "TX_FRONT_MONTH": {
       "available": true,
-      "price": 46421,
+      "price": 46467,
       "bid": null,
       "ask": null,
       "priceBasis": "last_or_reported_price",
-      "changePercent": 0.14,
+      "changePercent": 0.24,
       "contractMonth": "202609",
       "explicitContract": true,
       "live": true,
       "quoteType": "explicit_contract_live",
-      "sourceAt": "2026-08-28T14:31:14.000Z",
-      "updatedAt": "2026-08-28T14:31:14.000Z",
+      "sourceAt": "2026-08-28T14:34:20.000Z",
+      "updatedAt": "2026-08-28T14:34:20.000Z",
       "sourceTimeBasis": "sourceAt",
       "source": "Yahoo Taiwan Stock WTXU6",
       "sourceSymbol": "WTXU6",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T14:31:14.000Z",
-        "ageSeconds": 89,
-        "rawAgeSeconds": 89,
+        "sourceAt": "2026-08-28T14:34:20.000Z",
+        "ageSeconds": 22,
+        "rawAgeSeconds": 22,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -595,7 +595,7 @@
       "invalid": 0
     },
     "oldestSourceAt": "2026-08-28T05:30:00.000Z",
-    "newestSourceAt": "2026-08-28T14:31:14.000Z",
+    "newestSourceAt": "2026-08-28T14:34:20.000Z",
     "quality": "degraded",
     "qualityReasons": []
   },
@@ -613,8 +613,8 @@
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-28T14:31:14.165Z",
-    "evaluatedAt": "2026-08-28T14:32:42.965Z",
+    "startedAt": "2026-08-28T14:34:18.482Z",
+    "evaluatedAt": "2026-08-28T14:34:41.849Z",
     "sourceSchemas": {
       "health": "healthy",
       "marketData": "1.1",
