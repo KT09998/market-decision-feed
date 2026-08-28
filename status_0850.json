@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "stage": "0850",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-28T12:15:47.823Z",
+  "generatedAt": "2026-08-28T12:16:06.279Z",
   "targetDate": "2026-08-28",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "healthy",
-    "checkedAt": "2026-08-28T12:15:47.789Z",
+    "checkedAt": "2026-08-28T12:16:06.206Z",
     "session": "closed",
     "components": {
       "marketData": {
@@ -67,8 +67,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 24348,
-        "rawAgeSeconds": 24348,
+        "ageSeconds": 24366,
+        "rawAgeSeconds": 24366,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -95,8 +95,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 24348,
-        "rawAgeSeconds": 24348,
+        "ageSeconds": 24366,
+        "rawAgeSeconds": 24366,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -123,8 +123,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:33:00.000Z",
-        "ageSeconds": 24168,
-        "rawAgeSeconds": 24168,
+        "ageSeconds": 24186,
+        "rawAgeSeconds": 24186,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -151,8 +151,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 24348,
-        "rawAgeSeconds": 24348,
+        "ageSeconds": 24366,
+        "rawAgeSeconds": 24366,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -176,8 +176,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T20:00:03.000Z",
-        "ageSeconds": 58545,
-        "rawAgeSeconds": 58545,
+        "ageSeconds": 58563,
+        "rawAgeSeconds": 58563,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -199,8 +199,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T21:15:59.000Z",
-        "ageSeconds": 53989,
-        "rawAgeSeconds": 53989,
+        "ageSeconds": 54007,
+        "rawAgeSeconds": 54007,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -240,8 +240,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T20:00:00.000Z",
-        "ageSeconds": 58548,
-        "rawAgeSeconds": 58548,
+        "ageSeconds": 58566,
+        "rawAgeSeconds": 58566,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -263,8 +263,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T20:00:01.000Z",
-        "ageSeconds": 58547,
-        "rawAgeSeconds": 58547,
+        "ageSeconds": 58565,
+        "rawAgeSeconds": 58565,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -322,8 +322,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T12:15:33.000Z",
-        "ageSeconds": 15,
-        "rawAgeSeconds": 15,
+        "ageSeconds": 33,
+        "rawAgeSeconds": 33,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -348,8 +348,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T12:15:33.000Z",
-        "ageSeconds": 15,
-        "rawAgeSeconds": 15,
+        "ageSeconds": 33,
+        "rawAgeSeconds": 33,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -388,8 +388,8 @@
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-28T12:15:35.873Z",
-    "evaluatedAt": "2026-08-28T12:15:47.823Z",
+    "startedAt": "2026-08-28T12:15:59.279Z",
+    "evaluatedAt": "2026-08-28T12:16:06.279Z",
     "sourceSchemas": {
       "health": "healthy",
       "marketData": "1.1",
