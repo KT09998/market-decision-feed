@@ -60,7 +60,7 @@ Scheduled UTC cron entries correspond to:
 - Weekdays 08:45, 08:50, 08:55 for stage `0850`.
 - Weekdays 10:27, 10:30, 10:35, 10:40, then fallback attempts through 11:30 for stage `1030`.
 
-Fallback runs exit early when a structurally valid `READY` latest already exists for the same `targetDate` and stage. The workflow records its schedule expression, Actions run ID, commit SHA, and branch in `collection.workflow`; the final step verifies that a READY status has a matching latest file and that the pushed `main` ref equals the local commit. Taiwan market holidays are not encoded in cron; the data gates decide whether an observation is acceptable.
+The collector enforces Asia/Taipei stage windows of `00:00:00`-`01:00:00` for `0000`, `08:50:00`-`08:59:59` for `0850`, and `10:30:00`-`11:30:59` for `1030`. A run that starts after its not-after boundary is `DEGRADED`, records `stage.<stage>.expired_after_not_after`, sets `collection.latestUpdated=false`, and cannot replace `latest_<stage>.json`. Fallback runs exit early when a structurally valid `READY` latest already exists for the same `targetDate` and stage. The workflow records its schedule expression, Actions run ID, commit SHA, and branch in `collection.workflow`; the stage-window guard and final publication check enforce the same boundaries. Taiwan market holidays are not encoded in cron; the data gates decide whether an observation is acceptable.
 
 ## Close stage
 
@@ -80,3 +80,4 @@ Freshness uses only sourceAt or updatedAt; bridge fetchedAt and generatedAt cann
 Run the close self-test locally with: node scripts/collect-close.mjs --self-test
 
 To validate API access without changing latest_close.json, manually dispatch Collect market close bridge with test_mode=true. The run writes only status_close.json and auditable workflow evidence.
+
