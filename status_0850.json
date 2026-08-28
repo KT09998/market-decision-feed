@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "stage": "0850",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-28T12:16:06.279Z",
+  "generatedAt": "2026-08-28T12:22:05.980Z",
   "targetDate": "2026-08-28",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "healthy",
-    "checkedAt": "2026-08-28T12:16:06.206Z",
+    "checkedAt": "2026-08-28T12:22:05.921Z",
     "session": "closed",
     "components": {
       "marketData": {
@@ -67,8 +67,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 24366,
-        "rawAgeSeconds": 24366,
+        "ageSeconds": 24726,
+        "rawAgeSeconds": 24726,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -95,8 +95,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 24366,
-        "rawAgeSeconds": 24366,
+        "ageSeconds": 24726,
+        "rawAgeSeconds": 24726,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -123,8 +123,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:33:00.000Z",
-        "ageSeconds": 24186,
-        "rawAgeSeconds": 24186,
+        "ageSeconds": 24546,
+        "rawAgeSeconds": 24546,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -151,8 +151,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 24366,
-        "rawAgeSeconds": 24366,
+        "ageSeconds": 24726,
+        "rawAgeSeconds": 24726,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1200,
         "basis": "sourceAt_or_updatedAt"
@@ -176,8 +176,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T20:00:03.000Z",
-        "ageSeconds": 58563,
-        "rawAgeSeconds": 58563,
+        "ageSeconds": 58923,
+        "rawAgeSeconds": 58923,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -199,8 +199,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T21:15:59.000Z",
-        "ageSeconds": 54007,
-        "rawAgeSeconds": 54007,
+        "ageSeconds": 54367,
+        "rawAgeSeconds": 54367,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -240,8 +240,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T20:00:00.000Z",
-        "ageSeconds": 58566,
-        "rawAgeSeconds": 58566,
+        "ageSeconds": 58926,
+        "rawAgeSeconds": 58926,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -263,8 +263,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-27T20:00:01.000Z",
-        "ageSeconds": 58565,
-        "rawAgeSeconds": 58565,
+        "ageSeconds": 58925,
+        "rawAgeSeconds": 58925,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -310,20 +310,20 @@
   "futures": {
     "TX_DIRECTION": {
       "available": true,
-      "price": 46406,
-      "changePercent": 0.11,
-      "sourceAt": "2026-08-28T12:15:33.000Z",
+      "price": 46425,
+      "changePercent": 0.15,
+      "sourceAt": "2026-08-28T12:21:04.000Z",
       "source": "Yahoo Taiwan Stock WTX&",
       "sourceSymbol": "WTX&",
-      "updatedAt": "2026-08-28T12:15:33.000Z",
+      "updatedAt": "2026-08-28T12:21:04.000Z",
       "sourceTimeBasis": "sourceAt",
       "quoteType": "continuous_nearby_direction",
       "contractMonth": null,
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T12:15:33.000Z",
-        "ageSeconds": 33,
-        "rawAgeSeconds": 33,
+        "sourceAt": "2026-08-28T12:21:04.000Z",
+        "ageSeconds": 62,
+        "rawAgeSeconds": 62,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -331,25 +331,25 @@
     },
     "TX_FRONT_MONTH": {
       "available": true,
-      "price": 46406,
+      "price": 46425,
       "bid": null,
       "ask": null,
       "priceBasis": "last_or_reported_price",
-      "changePercent": 0.11,
+      "changePercent": 0.15,
       "contractMonth": "202609",
       "explicitContract": true,
       "live": true,
       "quoteType": "explicit_contract_live",
-      "sourceAt": "2026-08-28T12:15:33.000Z",
-      "updatedAt": "2026-08-28T12:15:33.000Z",
+      "sourceAt": "2026-08-28T12:21:04.000Z",
+      "updatedAt": "2026-08-28T12:21:04.000Z",
       "sourceTimeBasis": "sourceAt",
       "source": "Yahoo Taiwan Stock WTXU6",
       "sourceSymbol": "WTXU6",
       "freshness": {
         "status": "fresh",
-        "sourceAt": "2026-08-28T12:15:33.000Z",
-        "ageSeconds": 33,
-        "rawAgeSeconds": 33,
+        "sourceAt": "2026-08-28T12:21:04.000Z",
+        "ageSeconds": 62,
+        "rawAgeSeconds": 62,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -374,7 +374,7 @@
       "invalid": 0
     },
     "oldestSourceAt": "2026-08-27T20:00:00.000Z",
-    "newestSourceAt": "2026-08-28T12:15:33.000Z",
+    "newestSourceAt": "2026-08-28T12:21:04.000Z",
     "quality": "degraded",
     "qualityReasons": []
   },
@@ -388,8 +388,8 @@
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-28T12:15:59.279Z",
-    "evaluatedAt": "2026-08-28T12:16:06.279Z",
+    "startedAt": "2026-08-28T12:21:03.459Z",
+    "evaluatedAt": "2026-08-28T12:22:05.980Z",
     "sourceSchemas": {
       "health": "healthy",
       "marketData": "1.1",
