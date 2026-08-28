@@ -755,6 +755,14 @@ async function buildPayload(stage, testMode, startedAt = new Date()) {
       latestUpdated: false,
       startedAt: startedAt.toISOString(),
       evaluatedAt: evaluatedAt.toISOString(),
+      workflow: {
+        actions: process.env.GITHUB_ACTIONS === "true",
+        event: process.env.GITHUB_EVENT_NAME ?? null,
+        schedule: process.env.SCHEDULE || null,
+        runId: process.env.WORKFLOW_RUN_ID || null,
+        sha: process.env.WORKFLOW_SHA || null,
+        ref: process.env.WORKFLOW_REF || null,
+      },
       sourceSchemas: { health: responses.health.data?.status ?? null, marketData: marketData?.schemaVersion ?? null, snapshot: snapshot?.schemaVersion ?? null },
     },
   };
@@ -882,6 +890,13 @@ async function runSelfTest() {
   const readyEvaluation = new Date("2026-08-15T02:32:25.000Z");
   const ready1030 = makeFixture("1030", readyEvaluation, { startedAt: readyStart });
   assert(determineStatus("1030", ready1030, [], false, readyEvaluation, readyStart).status === "READY", "10:32 start did not pass the stage gate");
+
+  const delayed1030 = makeFixture("1030", readyEvaluation, { startedAt: readyStart });
+  for (const quote of Object.values(delayed1030.spot)) {
+    quote.freshness = { status: "stale", sourceAt: "2026-08-14T02:32:00.000Z" };
+  }
+  const delayed1030Decision = determineStatus("1030", delayed1030, [], false, readyEvaluation, readyStart);
+  assert(delayed1030Decision.status !== "READY" && delayed1030Decision.missingRequired.includes("spot.0050.current_last_trade"), "delayed 1030 source was published as READY");
 
   const warm0850Start = new Date("2026-08-15T00:47:00.000Z");
   const warm0850Evaluation = new Date("2026-08-15T00:52:00.000Z");

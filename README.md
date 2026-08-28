@@ -56,11 +56,11 @@ The workflow also supports manual dispatch with a selectable stage and `test_mod
 
 Scheduled UTC cron entries correspond to:
 
-- Asia/Taipei 23:55, 00:01, 00:06 for stage `0000`.
+- Asia/Taipei 23:40, 23:50, 23:58, 00:06 for stage `0000`.
 - Weekdays 08:45, 08:50, 08:55 for stage `0850`.
-- Weekdays 10:27, 10:30, 10:35, 10:40 for stage `1030`.
+- Weekdays 10:27, 10:30, 10:35, 10:40, then fallback attempts through 11:30 for stage `1030`.
 
-Fallback runs exit early when a structurally valid `READY` latest already exists for the same `targetDate` and stage. Taiwan market holidays are not encoded in cron; the data gates decide whether an observation is acceptable.
+Fallback runs exit early when a structurally valid `READY` latest already exists for the same `targetDate` and stage. The workflow records its schedule expression, Actions run ID, commit SHA, and branch in `collection.workflow`; the final step verifies that a READY status has a matching latest file and that the pushed `main` ref equals the local commit. Taiwan market holidays are not encoded in cron; the data gates decide whether an observation is acceptable.
 
 ## Close stage
 
@@ -80,4 +80,3 @@ Freshness uses only sourceAt or updatedAt; bridge fetchedAt and generatedAt cann
 Run the close self-test locally with: node scripts/collect-close.mjs --self-test
 
 To validate API access without changing latest_close.json, manually dispatch Collect market close bridge with test_mode=true. The run writes only status_close.json and auditable workflow evidence.
-

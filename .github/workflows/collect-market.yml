@@ -32,6 +32,15 @@ on:
     - cron: "30 2 * * 1-5"
     - cron: "35 2 * * 1-5"
     - cron: "40 2 * * 1-5"
+    # Late fallback attempts through Asia/Taipei 11:30 in case a scheduled run is delayed.
+    - cron: "45 2 * * 1-5"
+    - cron: "0 3 * * 1-5"
+    - cron: "15 3 * * 1-5"
+    - cron: "30 3 * * 1-5"
+    - cron: "45 3 * * 1-5"
+    - cron: "0 4 * * 1-5"
+    - cron: "15 4 * * 1-5"
+    - cron: "30 4 * * 1-5"
 
 permissions:
   contents: write
@@ -73,7 +82,7 @@ jobs:
             case "$SCHEDULE" in
               "40 15 * * *"|"50 15 * * *"|"58 15 * * *"|"6 16 * * *") stage="0000" ;;
               "45 0 * * 1-5"|"50 0 * * 1-5"|"55 0 * * 1-5") stage="0850" ;;
-              "27 2 * * 1-5"|"30 2 * * 1-5"|"35 2 * * 1-5"|"40 2 * * 1-5") stage="1030" ;;
+              "27 2 * * 1-5"|"30 2 * * 1-5"|"35 2 * * 1-5"|"40 2 * * 1-5"|"45 2 * * 1-5"|"0 3 * * 1-5"|"15 3 * * 1-5"|"30 3 * * 1-5"|"45 3 * * 1-5"|"0 4 * * 1-5"|"15 4 * * 1-5"|"30 4 * * 1-5") stage="1030" ;;
               *) echo "Unknown schedule: $SCHEDULE" >&2; exit 1 ;;
             esac
           fi
@@ -88,11 +97,37 @@ jobs:
         env:
           STAGE: ${{ steps.vars.outputs.stage }}
           TEST_MODE: ${{ steps.vars.outputs.test_mode }}
+          SCHEDULE: ${{ github.event.schedule }}
+          WORKFLOW_RUN_ID: ${{ github.run_id }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          WORKFLOW_REF: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           args=(--stage "$STAGE")
           if [[ "$TEST_MODE" == "true" ]]; then args+=(--test-mode); fi
           node scripts/collect-market.mjs "${args[@]}"
+
+      - name: Verify collection and publication contract
+        shell: bash
+        env:
+          STAGE: ${{ steps.vars.outputs.stage }}
+          TEST_MODE: ${{ steps.vars.outputs.test_mode }}
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const stage = process.env.STAGE;
+          const status = JSON.parse(fs.readFileSync(`status_${stage}.json`, 'utf8'));
+          if (status.stage !== stage) throw new Error(`status stage mismatch: ${status.stage}`);
+          if (!status.targetDate || !status.generatedAt || !status.collection) throw new Error('status publication metadata is incomplete');
+          if (process.env.TEST_MODE !== 'true' && status.status === 'READY') {
+            const latest = JSON.parse(fs.readFileSync(`latest_${stage}.json`, 'utf8'));
+            if (latest.status !== 'READY' || latest.stage !== stage || latest.targetDate !== status.targetDate || latest.collection?.latestUpdated !== true) {
+              throw new Error('READY status was not published as a matching latest file');
+            }
+          }
+          console.log(`PUBLICATION_CONTRACT_OK stage=${stage} status=${status.status} targetDate=${status.targetDate} latestUpdated=${status.collection.latestUpdated}`);
+          NODE
 
       - name: Upload test evidence
         if: always()
@@ -127,4 +162,6 @@ jobs:
           else
             git commit -m "data: collect ${STAGE} ${target_date}"
           fi
-          git push
+          git push origin HEAD:main
+          test "$(git rev-parse HEAD)" = "$(git ls-remote origin refs/heads/main | cut -f1)"
+          git status --short --branch
