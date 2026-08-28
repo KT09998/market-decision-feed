@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -43,17 +43,24 @@ const CORE_SPOT = ["0050", "2330", "TAIEX"];
 const SPOT_SYMBOLS = [...CORE_SPOT, "00631L"];
 const OVERNIGHT_SYMBOLS = ["TSM", "SOX", "QQQ_NASDAQ", "NVDA", "MU", "USD_TWD", "VIX"];
 const STAGE_NOT_BEFORE = { "0000": "00:00:00", "0850": "08:50:00", "1030": "10:30:00" };
+const STAGE_NOT_AFTER = { "0000": "01:00:00", "0850": "08:59:59", "1030": "11:30:59" };
+const WORKFLOW_SCHEDULES = {
+  "0000": ["40 15 * * *", "50 15 * * *", "58 15 * * *", "6 16 * * *"],
+  "0850": ["45 0 * * 1-5", "50 0 * * 1-5", "55 0 * * 1-5"],
+  "1030": ["27 2 * * 1-5", "30 2 * * 1-5", "35 2 * * 1-5", "40 2 * * 1-5", "45 2 * * 1-5", "0 3 * * 1-5", "15 3 * * 1-5", "30 3 * * 1-5", "45 3 * * 1-5", "0 4 * * 1-5", "15 4 * * 1-5", "30 4 * * 1-5"],
+};
 const CLOCK_SKEW_TOLERANCE_SECONDS = 5;
 const MIDNIGHT_FRESH_SECONDS = 15 * 60;
 const MIDNIGHT_DELAYED_SECONDS = 30 * 60;
 
 function parseArgs(argv) {
-  const options = { stage: null, testMode: false, selfTest: false, force: false };
+  const options = { stage: null, testMode: false, selfTest: false, stageWindowGuard: false, force: false };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
     if (value === "--stage") options.stage = argv[++index];
     else if (value === "--test-mode") options.testMode = true;
     else if (value === "--self-test") options.selfTest = true;
+    else if (value === "--stage-window-guard") options.stageWindowGuard = true;
     else if (value === "--force") options.force = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
@@ -111,9 +118,29 @@ function stageNotBefore(stage, targetDate) {
   return time && targetDate ? new Date(targetDate + "T" + time + "+08:00") : null;
 }
 
+function stageNotAfter(stage, targetDate) {
+  const time = STAGE_NOT_AFTER[stage];
+  return time && targetDate ? new Date(targetDate + "T" + time + "+08:00") : null;
+}
+
+function stageWindowDetails(stage, targetDate, at) {
+  const notBefore = stageNotBefore(stage, targetDate);
+  const notAfter = stageNotAfter(stage, targetDate);
+  const valid = notBefore !== null && notAfter !== null &&
+    Number.isFinite(notBefore.getTime()) && Number.isFinite(notAfter.getTime()) &&
+    at instanceof Date && Number.isFinite(at.getTime());
+  const state = !valid ? "invalid" : at.getTime() < notBefore.getTime() ? "before" : at.getTime() > notAfter.getTime() ? "expired" : "open";
+  return {
+    timezone: "Asia/Taipei",
+    state,
+    notBefore: notBefore && Number.isFinite(notBefore.getTime()) ? notBefore.toISOString() : null,
+    notAfter: notAfter && Number.isFinite(notAfter.getTime()) ? notAfter.toISOString() : null,
+    observedAt: at instanceof Date && Number.isFinite(at.getTime()) ? at.toISOString() : null,
+  };
+}
+
 function stageWindowOpen(stage, targetDate, at) {
-  const gate = stageNotBefore(stage, targetDate);
-  return gate !== null && Number.isFinite(gate.getTime()) && at instanceof Date && Number.isFinite(at.getTime()) && at.getTime() >= gate.getTime();
+  return stageWindowDetails(stage, targetDate, at).state === "open";
 }
 
 function sourceTimestamp(value) {
@@ -505,8 +532,11 @@ function determineStatus(stage, data, fetchErrors, testMode, evaluatedAt = new D
   const missingOptional = [];
   const qualityReasons = [];
   const collectionStart = startedAt ?? payloadCollectionStartedAt(data, evaluatedAt) ?? evaluatedAt;
-  const stageOpen = stageWindowOpen(stage, data.targetDate, collectionStart);
-  if (!stageOpen) missingRequired.push("stage." + stage + ".not_before");
+  const stageWindow = stageWindowDetails(stage, data.targetDate, collectionStart);
+  const stageOpen = stageWindow.state === "open";
+  if (stageWindow.state === "before") missingRequired.push("stage." + stage + ".not_before");
+  else if (stageWindow.state === "expired") missingRequired.push("stage." + stage + ".expired_after_not_after");
+  else if (stageWindow.state === "invalid") missingRequired.push("stage." + stage + ".window_invalid");
   if (!data.marketHealth.available) missingOptional.push("marketHealth");
 
   if (stage === "1030") {
@@ -583,10 +613,11 @@ function determineStatus(stage, data, fetchErrors, testMode, evaluatedAt = new D
   let status;
   if (fetchErrors.length >= 3) status = "ERROR";
   else if (testMode) status = fetchErrors.length ? "DEGRADED" : "COLLECTING";
-  else if (!stageOpen) status = "COLLECTING";
+  else if (stageWindow.state === "before") status = "COLLECTING";
+  else if (!stageOpen) status = "DEGRADED";
   else if (missingRequired.length === 0) status = "READY";
   else status = "DEGRADED";
-  const quality = qualityReasons.length ? "downgraded" : missingRequired.length ? (stageOpen ? "degraded" : "warmup") : "standard";
+  const quality = qualityReasons.length ? "downgraded" : missingRequired.length ? (stageOpen ? "degraded" : stageWindow.state === "before" ? "warmup" : "degraded") : "standard";
   return { status, missingRequired, missingOptional, quality, qualityReasons };
 }
 
@@ -755,6 +786,7 @@ async function buildPayload(stage, testMode, startedAt = new Date()) {
       latestUpdated: false,
       startedAt: startedAt.toISOString(),
       evaluatedAt: evaluatedAt.toISOString(),
+      stageWindow: stageWindowDetails(stage, targetDate, startedAt),
       workflow: {
         actions: process.env.GITHUB_ACTIONS === "true",
         event: process.env.GITHUB_EVENT_NAME ?? null,
@@ -776,9 +808,9 @@ async function buildPayload(stage, testMode, startedAt = new Date()) {
   return data;
 }
 
-async function writeCollection(payload, testMode) {
-  const statusPath = path.join(ROOT, `status_${payload.stage}.json`);
-  const latestPath = path.join(ROOT, `latest_${payload.stage}.json`);
+async function writeCollection(payload, testMode, root = ROOT) {
+  const statusPath = path.join(root, `status_${payload.stage}.json`);
+  const latestPath = path.join(root, `latest_${payload.stage}.json`);
   const serializedStatus = `${JSON.stringify(payload, null, 2)}\n`;
   const validation = validatePayload(payload);
   if (validation.failures.length) throw new Error(`Output validation failed: ${validation.failures.join("; ")}`);
@@ -787,8 +819,11 @@ async function writeCollection(payload, testMode) {
   let latestUpdated = false;
   if (!testMode) {
     const existing = await readJsonIfPresent(latestPath);
-    const readyForLatest = payload.status === "READY" && stageWindowOpen(payload.stage, payload.targetDate, payloadCollectionStartedAt(payload, new Date(payload.generatedAt ?? 0)));
-    if (readyForLatest || (payload.status !== "READY" && existing?.status !== "READY")) {
+    const collectionStartedAt = payloadCollectionStartedAt(payload, new Date(payload.generatedAt ?? 0));
+    const stageWindowState = stageWindowDetails(payload.stage, payload.targetDate, collectionStartedAt).state;
+    const readyForLatest = payload.status === "READY" && stageWindowState === "open";
+    const nonReadyMayReplaceLatest = stageWindowState === "before" || stageWindowState === "open";
+    if (readyForLatest || (nonReadyMayReplaceLatest && payload.status !== "READY" && existing?.status !== "READY")) {
       const latest = structuredClone(payload);
       latest.collection.latestUpdated = true;
       const latestValidation = validatePayload(latest);
@@ -806,6 +841,21 @@ async function runSelfTest() {
   const assert = (condition, message) => {
     if (!condition) failures.push(message);
   };
+  const workflowText = await readFile(path.join(ROOT, ".github", "workflows", "collect-market.yml"), "utf8");
+  for (const [stage, schedules] of Object.entries(WORKFLOW_SCHEDULES)) {
+    for (const schedule of schedules) {
+      assert(workflowText.includes(`cron: "${schedule}"`), `workflow schedule missing for ${stage}: ${schedule}`);
+    }
+    const mapping = schedules.map((schedule) => `"${schedule}"`).join("|");
+    assert(workflowText.includes(`${mapping}) stage="${stage}"`), `workflow schedule mapping drifted for ${stage}`);
+  }
+  assert(workflowText.includes("--stage-window-guard --stage \"$STAGE\""), "workflow stage-window guard is not wired");
+  assert(stageWindowDetails("0000", "2026-08-15", new Date("2026-08-14T17:00:00.000Z")).state === "open", "00:00 stage window did not accept 01:00 boundary");
+  assert(stageWindowDetails("0000", "2026-08-15", new Date("2026-08-15T00:36:00.000Z")).state === "expired", "00:00 stage window accepted delayed 08:36 run");
+  assert(stageWindowDetails("0850", "2026-08-15", new Date("2026-08-15T00:59:59.000Z")).state === "open", "08:50 stage window rejected 08:59:59 boundary");
+  assert(stageWindowDetails("0850", "2026-08-15", new Date("2026-08-15T01:00:00.000Z")).state === "expired", "08:50 stage window accepted 09:00 run");
+  assert(stageWindowDetails("1030", "2026-08-15", new Date("2026-08-15T03:30:59.000Z")).state === "open", "10:30 stage window rejected 11:30:59 boundary");
+  assert(stageWindowDetails("1030", "2026-08-15", new Date("2026-08-15T03:31:00.000Z")).state === "expired", "10:30 stage window accepted 11:31 run");
   const makeFixture = (stage, evaluatedAt, options = {}) => {
     const targetDate = targetDateFor(stage, evaluatedAt);
     const startedAt = options.startedAt ?? evaluatedAt;
@@ -911,6 +961,19 @@ async function runSelfTest() {
   assert(determineStatus("0000", warm0000, [], false, warm0000Evaluation, warm0000Start).status === "COLLECTING", "23:57 start remained eligible after retry crossed gate");
   const ready0000 = new Date("2026-08-14T16:03:00.000Z");
   assert(determineStatus("0000", makeFixture("0000", ready0000), [], false, ready0000).status === "READY", "00:03 did not pass the stage gate");
+  const delayed0000Start = new Date("2026-08-15T00:36:00.000Z");
+  const delayed0000 = makeFixture("0000", delayed0000Start, { startedAt: delayed0000Start });
+  const delayed0000Decision = determineStatus("0000", delayed0000, [], false, delayed0000Start, delayed0000Start);
+  assert(delayed0000Decision.status === "DEGRADED" && delayed0000Decision.missingRequired.includes("stage.0000.expired_after_not_after"), "08:36 delayed 0000 run was not marked expired");
+  delayed0000.status = delayed0000Decision.status;
+  delayed0000.missingRequired = delayed0000Decision.missingRequired;
+  delayed0000.collection.stageWindow = stageWindowDetails("0000", delayed0000.targetDate, delayed0000Start);
+  const late0850 = new Date("2026-08-15T01:00:00.000Z");
+  const late0850Decision = determineStatus("0850", makeFixture("0850", late0850, { startedAt: late0850 }), [], false, late0850, late0850);
+  assert(late0850Decision.status === "DEGRADED" && late0850Decision.missingRequired.includes("stage.0850.expired_after_not_after"), "09:00 delayed 0850 run was not marked expired");
+  const late1030 = new Date("2026-08-15T03:31:00.000Z");
+  const late1030Decision = determineStatus("1030", makeFixture("1030", late1030, { startedAt: late1030 }), [], false, late1030, late1030);
+  assert(late1030Decision.status === "DEGRADED" && late1030Decision.missingRequired.includes("stage.1030.expired_after_not_after"), "11:31 delayed 1030 run was not marked expired");
 
   const preGateLongRunning = makeFixture("1030", warmEvaluation, { startedAt: warmStart });
   preGateLongRunning.status = "READY";
@@ -959,6 +1022,18 @@ async function runSelfTest() {
   }
   const sensitiveFixture = { safe: true, api_key: "must-be-detected" };
   assert(findSensitiveKeys(sensitiveFixture).length === 1, "sensitive-key scanner failed");
+  const tempRoot = await mkdtemp(path.join(ROOT, ".market-self-test-"));
+  try {
+    const sentinel = JSON.stringify({ sentinel: true });
+    await writeFile(path.join(tempRoot, "latest_0000.json"), sentinel, "utf8");
+    await writeCollection(delayed0000, false, tempRoot);
+    const latestAfter = await readFile(path.join(tempRoot, "latest_0000.json"), "utf8");
+    const statusAfter = JSON.parse(await readFile(path.join(tempRoot, "status_0000.json"), "utf8"));
+    assert(latestAfter === sentinel, "expired 0000 run overwrote latest_0000.json");
+    assert(statusAfter.status === "DEGRADED" && statusAfter.collection.latestUpdated === false, "expired 0000 run did not leave a degraded status-only result");
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
   if (failures.length) throw new Error("Self-test failed:\n- " + failures.join("\n- "));
   console.log("SELF_TEST_OK templates=" + templateFiles.length + " maxPayloadBytes=" + MAX_PAYLOAD_BYTES);
 }
@@ -969,6 +1044,15 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.selfTest) {
     await runSelfTest();
+    return;
+  }
+  if (options.stageWindowGuard) {
+    if (!STAGES.has(options.stage)) throw new Error("--stage-window-guard requires --stage 0000, 0850, or 1030");
+    const startedAt = new Date();
+    const targetDate = targetDateFor(options.stage, startedAt);
+    const window = stageWindowDetails(options.stage, targetDate, startedAt);
+    if (window.state === "invalid") throw new Error(`Stage window guard could not evaluate stage=${options.stage} targetDate=${targetDate}`);
+    console.log(`STAGE_WINDOW_GUARD_OK stage=${options.stage} targetDate=${targetDate} state=${window.state} notAfter=${window.notAfter} expiredRunsAreStatusOnly=true`);
     return;
   }
   if (!STAGES.has(options.stage)) throw new Error("--stage must be one of 0000, 0850, or 1030");
@@ -986,3 +1070,4 @@ main().catch((error) => {
   console.error(error.stack ?? error.message);
   process.exitCode = 1;
 });
+
