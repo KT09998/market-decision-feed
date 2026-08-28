@@ -92,6 +92,12 @@ jobs:
       - name: Run self-test
         run: node scripts/collect-market.mjs --self-test
 
+      - name: Run stage window guard
+        shell: bash
+        env:
+          STAGE: ${{ steps.vars.outputs.stage }}
+        run: node scripts/collect-market.mjs --stage-window-guard --stage "$STAGE"
+
       - name: Collect public market data
         shell: bash
         env:
@@ -125,6 +131,10 @@ jobs:
             if (latest.status !== 'READY' || latest.stage !== stage || latest.targetDate !== status.targetDate || latest.collection?.latestUpdated !== true) {
               throw new Error('READY status was not published as a matching latest file');
             }
+          }
+          const expiredReason = `stage.${stage}.expired_after_not_after`;
+          if (status.missingRequired?.includes(expiredReason) && (status.status === 'READY' || status.collection.latestUpdated !== false)) {
+            throw new Error('Expired stage run violated status-only publication contract');
           }
           console.log(`PUBLICATION_CONTRACT_OK stage=${stage} status=${status.status} targetDate=${status.targetDate} latestUpdated=${status.collection.latestUpdated}`);
           NODE
@@ -165,3 +175,4 @@ jobs:
           git push origin HEAD:main
           test "$(git rev-parse HEAD)" = "$(git ls-remote origin refs/heads/main | cut -f1)"
           git status --short --branch
+
