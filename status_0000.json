@@ -2,8 +2,8 @@
   "schemaVersion": "1.0.0",
   "stage": "0000",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-29T00:31:12.457Z",
-  "targetDate": "2026-08-29",
+  "generatedAt": "2026-08-29T18:52:21.004Z",
+  "targetDate": "2026-08-30",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
     "endpoints": {
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "degraded",
-    "checkedAt": "2026-08-29T00:31:12.427Z",
+    "checkedAt": "2026-08-29T18:52:20.942Z",
     "session": "closed",
     "components": {
       "marketData": {
@@ -65,10 +65,10 @@
       "updatedAt": "2026-08-28T13:30:00+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 68472,
-        "rawAgeSeconds": 68472,
+        "ageSeconds": 134541,
+        "rawAgeSeconds": 134541,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -93,10 +93,10 @@
       "updatedAt": "2026-08-28T13:30:00+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 68472,
-        "rawAgeSeconds": 68472,
+        "ageSeconds": 134541,
+        "rawAgeSeconds": 134541,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -121,10 +121,10 @@
       "updatedAt": "2026-08-28T13:33:00+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-28T05:33:00.000Z",
-        "ageSeconds": 68292,
-        "rawAgeSeconds": 68292,
+        "ageSeconds": 134361,
+        "rawAgeSeconds": 134361,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -149,10 +149,10 @@
       "updatedAt": "2026-08-28T13:30:00+08:00",
       "sourceTimeBasis": "sourceAt",
       "freshness": {
-        "status": "fresh",
+        "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 68472,
-        "rawAgeSeconds": 68472,
+        "ageSeconds": 134541,
+        "rawAgeSeconds": 134541,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -176,8 +176,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T20:00:02.000Z",
-        "ageSeconds": 16270,
-        "rawAgeSeconds": 16270,
+        "ageSeconds": 82339,
+        "rawAgeSeconds": 82339,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -199,8 +199,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T21:15:59.000Z",
-        "ageSeconds": 11713,
-        "rawAgeSeconds": 11713,
+        "ageSeconds": 77782,
+        "rawAgeSeconds": 77782,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -240,8 +240,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T20:00:00.000Z",
-        "ageSeconds": 16272,
-        "rawAgeSeconds": 16272,
+        "ageSeconds": 82341,
+        "rawAgeSeconds": 82341,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -263,8 +263,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T20:00:01.000Z",
-        "ageSeconds": 16271,
-        "rawAgeSeconds": 16271,
+        "ageSeconds": 82340,
+        "rawAgeSeconds": 82340,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -322,8 +322,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T20:59:58.000Z",
-        "ageSeconds": 12674,
-        "rawAgeSeconds": 12674,
+        "ageSeconds": 78743,
+        "rawAgeSeconds": 78743,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -348,8 +348,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T20:59:58.000Z",
-        "ageSeconds": 12674,
-        "rawAgeSeconds": 12674,
+        "ageSeconds": 78743,
+        "rawAgeSeconds": 78743,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -368,8 +368,8 @@
     "fetchedAtIsFreshnessEvidence": false,
     "testMode": false,
     "counts": {
-      "fresh": 8,
-      "stale": 2,
+      "fresh": 4,
+      "stale": 6,
       "missing": 3,
       "invalid": 0
     },
@@ -389,21 +389,21 @@
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-29T00:30:37.184Z",
-    "evaluatedAt": "2026-08-29T00:31:12.457Z",
+    "startedAt": "2026-08-29T18:51:43.050Z",
+    "evaluatedAt": "2026-08-29T18:52:21.004Z",
     "stageWindow": {
       "timezone": "Asia/Taipei",
       "state": "expired",
-      "notBefore": "2026-08-28T16:00:00.000Z",
-      "notAfter": "2026-08-28T17:00:00.000Z",
-      "observedAt": "2026-08-29T00:30:37.184Z"
+      "notBefore": "2026-08-29T16:00:00.000Z",
+      "notAfter": "2026-08-29T17:00:00.000Z",
+      "observedAt": "2026-08-29T18:51:43.050Z"
     },
     "workflow": {
       "actions": true,
       "event": "schedule",
-      "schedule": "6 16 * * *",
-      "runId": "33223733882",
-      "sha": "dd4c68742501fd3c64840fc6860a2720b4a78370",
+      "schedule": "40 15 * * *",
+      "runId": "33269378968",
+      "sha": "ed2599e497fba763e2a4085dfece3be93ea7ae58",
       "ref": "main"
     },
     "sourceSchemas": {
