@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "stage": "0000",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-29T00:09:20.398Z",
+  "generatedAt": "2026-08-29T00:22:14.713Z",
   "targetDate": "2026-08-29",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
@@ -16,7 +16,7 @@
     "available": true,
     "ok": true,
     "status": "degraded",
-    "checkedAt": "2026-08-29T00:09:20.361Z",
+    "checkedAt": "2026-08-29T00:22:14.654Z",
     "session": "closed",
     "components": {
       "marketData": {
@@ -67,8 +67,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 67160,
-        "rawAgeSeconds": 67160,
+        "ageSeconds": 67935,
+        "rawAgeSeconds": 67935,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -95,8 +95,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 67160,
-        "rawAgeSeconds": 67160,
+        "ageSeconds": 67935,
+        "rawAgeSeconds": 67935,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -123,8 +123,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T05:33:00.000Z",
-        "ageSeconds": 66980,
-        "rawAgeSeconds": 66980,
+        "ageSeconds": 67755,
+        "rawAgeSeconds": 67755,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -151,8 +151,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 67160,
-        "rawAgeSeconds": 67160,
+        "ageSeconds": 67935,
+        "rawAgeSeconds": 67935,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -161,40 +161,50 @@
   },
   "overnight": {
     "TSM": {
-      "available": false,
-      "price": null,
-      "bid": null,
-      "ask": null,
-      "sourceAt": null,
-      "updatedAt": null,
-      "sourceTimeBasis": null,
-      "source": null,
+      "available": true,
+      "price": 417.52,
+      "changePercent": -2.29,
+      "sourceAt": "2026-08-28T20:00:02.000Z",
+      "source": "Yahoo Finance chart",
+      "sourceSymbol": "TSM",
+      "updatedAt": "2026-08-28T20:00:02.000Z",
+      "sourceTimeBasis": "sourceAt",
+      "quoteType": "regular_market_quote",
+      "completedSession": false,
+      "session": null,
+      "marketState": null,
       "freshness": {
-        "status": "missing",
-        "sourceAt": null,
-        "ageSeconds": null,
-        "maxAgeSeconds": null,
+        "status": "fresh",
+        "sourceAt": "2026-08-28T20:00:02.000Z",
+        "ageSeconds": 15733,
+        "rawAgeSeconds": 15733,
+        "clockSkewClamped": false,
+        "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
-      },
-      "reason": "symbol_absent_from_market_data"
+      }
     },
     "SOX": {
-      "available": false,
-      "price": null,
-      "bid": null,
-      "ask": null,
-      "sourceAt": null,
-      "updatedAt": null,
-      "sourceTimeBasis": null,
-      "source": null,
+      "available": true,
+      "price": 11469.662,
+      "changePercent": -3.47,
+      "sourceAt": "2026-08-28T21:15:59.000Z",
+      "source": "Yahoo Finance chart",
+      "sourceSymbol": "^SOX",
+      "updatedAt": "2026-08-28T21:15:59.000Z",
+      "sourceTimeBasis": "sourceAt",
+      "quoteType": "regular_market_quote",
+      "completedSession": false,
+      "session": null,
+      "marketState": null,
       "freshness": {
-        "status": "missing",
-        "sourceAt": null,
-        "ageSeconds": null,
-        "maxAgeSeconds": null,
+        "status": "fresh",
+        "sourceAt": "2026-08-28T21:15:59.000Z",
+        "ageSeconds": 11176,
+        "rawAgeSeconds": 11176,
+        "clockSkewClamped": false,
+        "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
-      },
-      "reason": "symbol_absent_from_market_data"
+      }
     },
     "QQQ_NASDAQ": {
       "available": false,
@@ -215,40 +225,50 @@
       "reason": "symbol_absent_from_market_data"
     },
     "NVDA": {
-      "available": false,
-      "price": null,
-      "bid": null,
-      "ask": null,
-      "sourceAt": null,
-      "updatedAt": null,
-      "sourceTimeBasis": null,
-      "source": null,
+      "available": true,
+      "price": 217.55,
+      "changePercent": -4.57,
+      "sourceAt": "2026-08-28T20:00:00.000Z",
+      "source": "Yahoo Finance chart",
+      "sourceSymbol": "NVDA",
+      "updatedAt": "2026-08-28T20:00:00.000Z",
+      "sourceTimeBasis": "sourceAt",
+      "quoteType": "regular_market_quote",
+      "completedSession": false,
+      "session": null,
+      "marketState": null,
       "freshness": {
-        "status": "missing",
-        "sourceAt": null,
-        "ageSeconds": null,
-        "maxAgeSeconds": null,
+        "status": "fresh",
+        "sourceAt": "2026-08-28T20:00:00.000Z",
+        "ageSeconds": 15735,
+        "rawAgeSeconds": 15735,
+        "clockSkewClamped": false,
+        "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
-      },
-      "reason": "symbol_absent_from_market_data"
+      }
     },
     "MU": {
-      "available": false,
-      "price": null,
-      "bid": null,
-      "ask": null,
-      "sourceAt": null,
-      "updatedAt": null,
-      "sourceTimeBasis": null,
-      "source": null,
+      "available": true,
+      "price": 932.86,
+      "changePercent": -0.27,
+      "sourceAt": "2026-08-28T20:00:01.000Z",
+      "source": "Yahoo Finance chart",
+      "sourceSymbol": "MU",
+      "updatedAt": "2026-08-28T20:00:01.000Z",
+      "sourceTimeBasis": "sourceAt",
+      "quoteType": "regular_market_quote",
+      "completedSession": false,
+      "session": null,
+      "marketState": null,
       "freshness": {
-        "status": "missing",
-        "sourceAt": null,
-        "ageSeconds": null,
-        "maxAgeSeconds": null,
+        "status": "fresh",
+        "sourceAt": "2026-08-28T20:00:01.000Z",
+        "ageSeconds": 15734,
+        "rawAgeSeconds": 15734,
+        "clockSkewClamped": false,
+        "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
-      },
-      "reason": "symbol_absent_from_market_data"
+      }
     },
     "USD_TWD": {
       "available": false,
@@ -289,45 +309,51 @@
   },
   "futures": {
     "TX_DIRECTION": {
-      "available": false,
-      "price": null,
-      "bid": null,
-      "ask": null,
-      "sourceAt": null,
-      "updatedAt": null,
-      "sourceTimeBasis": null,
-      "source": null,
-      "freshness": {
-        "status": "missing",
-        "sourceAt": null,
-        "ageSeconds": null,
-        "maxAgeSeconds": null,
-        "basis": "sourceAt_or_updatedAt"
-      },
-      "reason": "continuous_nearby_absent",
+      "available": true,
+      "price": 45900,
+      "changePercent": -0.99,
+      "sourceAt": "2026-08-28T20:59:58.000Z",
+      "source": "Yahoo Taiwan Stock WTX&",
+      "sourceSymbol": "WTX&",
+      "updatedAt": "2026-08-28T20:59:58.000Z",
+      "sourceTimeBasis": "sourceAt",
       "quoteType": "continuous_nearby_direction",
-      "contractMonth": null
+      "contractMonth": null,
+      "freshness": {
+        "status": "stale",
+        "sourceAt": "2026-08-28T20:59:58.000Z",
+        "ageSeconds": 12137,
+        "rawAgeSeconds": 12137,
+        "clockSkewClamped": false,
+        "maxAgeSeconds": 1800,
+        "basis": "sourceAt_or_updatedAt"
+      }
     },
     "TX_FRONT_MONTH": {
-      "available": false,
-      "price": null,
+      "available": true,
+      "price": 45900,
       "bid": null,
       "ask": null,
-      "sourceAt": null,
-      "updatedAt": null,
-      "sourceTimeBasis": null,
-      "source": null,
-      "freshness": {
-        "status": "missing",
-        "sourceAt": null,
-        "ageSeconds": null,
-        "maxAgeSeconds": null,
-        "basis": "sourceAt_or_updatedAt"
-      },
-      "reason": "explicit_front_month_absent",
+      "priceBasis": "last_or_reported_price",
+      "changePercent": -0.99,
+      "contractMonth": "202609",
+      "explicitContract": true,
+      "live": true,
       "quoteType": "explicit_contract_live",
-      "contractMonth": null,
-      "explicitContract": false
+      "sourceAt": "2026-08-28T20:59:58.000Z",
+      "updatedAt": "2026-08-28T20:59:58.000Z",
+      "sourceTimeBasis": "sourceAt",
+      "source": "Yahoo Taiwan Stock WTXU6",
+      "sourceSymbol": "WTXU6",
+      "freshness": {
+        "status": "stale",
+        "sourceAt": "2026-08-28T20:59:58.000Z",
+        "ageSeconds": 12137,
+        "rawAgeSeconds": 12137,
+        "clockSkewClamped": false,
+        "maxAgeSeconds": 1800,
+        "basis": "sourceAt_or_updatedAt"
+      }
     }
   },
   "intraday": {
@@ -342,57 +368,47 @@
     "fetchedAtIsFreshnessEvidence": false,
     "testMode": false,
     "counts": {
-      "fresh": 4,
-      "stale": 0,
-      "missing": 9,
+      "fresh": 8,
+      "stale": 2,
+      "missing": 3,
       "invalid": 0
     },
     "oldestSourceAt": "2026-08-28T05:30:00.000Z",
-    "newestSourceAt": "2026-08-28T05:33:00.000Z",
+    "newestSourceAt": "2026-08-28T21:15:59.000Z",
     "quality": "downgraded",
     "qualityReasons": [
-      "overnight.TSM.blocked",
-      "overnight.SOX_or_QQQ_NASDAQ.blocked"
+      "overnight.TSM.stale",
+      "overnight.SOX_or_QQQ_NASDAQ.stale"
     ]
   },
   "missingRequired": [
-    "stage.0000.expired_after_not_after",
-    "overnight.TSM.available",
-    "overnight.SOX_or_QQQ_NASDAQ.available"
+    "stage.0000.expired_after_not_after"
   ],
-  "missingOptional": [
-    "futures.TX_DIRECTION",
-    "futures.TX_FRONT_MONTH"
-  ],
-  "errors": [
-    {
-      "source": "public_api",
-      "message": "marketData: fetch failed"
-    }
-  ],
+  "missingOptional": [],
+  "errors": [],
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-29T00:08:10.932Z",
-    "evaluatedAt": "2026-08-29T00:09:20.398Z",
+    "startedAt": "2026-08-29T00:22:02.352Z",
+    "evaluatedAt": "2026-08-29T00:22:14.713Z",
     "stageWindow": {
       "timezone": "Asia/Taipei",
       "state": "expired",
       "notBefore": "2026-08-28T16:00:00.000Z",
       "notAfter": "2026-08-28T17:00:00.000Z",
-      "observedAt": "2026-08-29T00:08:10.932Z"
+      "observedAt": "2026-08-29T00:22:02.352Z"
     },
     "workflow": {
       "actions": true,
       "event": "schedule",
-      "schedule": "50 15 * * *",
-      "runId": "33222592648",
-      "sha": "1be201b74d11f8a80e2885e0348d15d017f3acb3",
+      "schedule": "58 15 * * *",
+      "runId": "33223304893",
+      "sha": "bc14e2eb9818814c8ac3cc4e90168a62d7e7dbbc",
       "ref": "main"
     },
     "sourceSchemas": {
       "health": "degraded",
-      "marketData": null,
+      "marketData": "1.1",
       "snapshot": "1.1"
     }
   }
