@@ -50,28 +50,20 @@ node scripts/collect-market.mjs --stage 1030 --test-mode
 
 The collector uses a 25-second HTTP timeout and up to three attempts, waiting 15 seconds and 30 seconds before the second and third attempts.
 
-## GitHub Actions schedule
+## GitHub Actions CI
 
-The workflow also supports manual dispatch with a selectable stage and `test_mode`.
-
-Scheduled UTC cron entries correspond to:
-
-- Asia/Taipei 23:40, 23:50, 23:58, 00:06 for stage `0000`.
-- Weekdays 08:45, 08:50, 08:55 for stage `0850`.
-- Weekdays 10:27, 10:30, 10:35, 10:40, then fallback attempts through 11:30 for stage `1030`.
-
-The collector enforces Asia/Taipei stage windows of `00:00:00`-`01:00:00` for `0000`, `08:50:00`-`08:59:59` for `0850`, and `10:30:00`-`11:30:59` for `1030`. A run that starts after its not-after boundary is `DEGRADED`, records `stage.<stage>.expired_after_not_after`, sets `collection.latestUpdated=false`, and cannot replace `latest_<stage>.json`. Fallback runs exit early when a structurally valid `READY` latest already exists for the same `targetDate` and stage. The workflow records its schedule expression, Actions run ID, commit SHA, and branch in `collection.workflow`; the stage-window guard and final publication check enforce the same boundaries. Taiwan market holidays are not encoded in cron; the data gates decide whether an observation is acceptable.
+GitHub Actions is intentionally limited to push, pull request, and manual self-tests. `.github/workflows/ci.yml` checks JavaScript syntax and runs both collector self-tests; it has `contents: read` permission only. It has no cron trigger, live third-party data collection, generated-data commit, or push step. Live collection remains a local/manual tool and is not a GitHub Actions data pipeline.
 
 ## Close stage
 
 The close stage is an independent, public-data-only collector. It adds:
 
 - scripts/collect-close.mjs: close-stage collector and self-test.
-- .github/workflows/collect-close.yml: weekday fallback schedule and manual workflow_dispatch with test_mode=true by default.
+- .github/workflows/ci.yml: push, pull request, and manual syntax/self-test workflow only.
 - latest_close.json: formal close output; it is written only by a non-test READY run.
 - status_close.json: the latest close collection attempt, including COLLECTING, DEGRADED, ERROR, and test evidence.
 
-The workflow runs at Asia/Taipei 13:35, 13:40, 13:45, and 13:50 (UTC 05:35, 05:40, 05:45, 05:50). A run started before 13:35 can never become formal READY, even if a retry crosses the gate. A close READY requires current target-date 0050, 2330, and TAIEX with close, open, high, low, and previousClose, non-reference last_trade semantics, source time on the target date at or after 13:20, and source-based freshness no older than 20 minutes at collection.evaluatedAt. 00631L is optional.
+The close collector is not scheduled by GitHub Actions. A close READY requires current target-date 0050, 2330, and TAIEX with close, open, high, low, and previousClose, non-reference last_trade semantics, source time on the target date at or after 13:20, and source-based freshness no older than 20 minutes at collection.evaluatedAt. 00631L is optional.
 
 The payload records closeVsOpenPercent, closeLocationPercent from 0 to 100, closePosition (near_low, middle, or near_high), and sessionStructure counts plus synchronized weak/strong close flags. First-hour and recent retention samples are auxiliary only. If the source does not sample 2330 intraday, the payload records intraday.2330_not_sampled_by_source and downgrades quality without blocking close READY; no value is fabricated.
 
@@ -79,5 +71,5 @@ Freshness uses only sourceAt or updatedAt; bridge fetchedAt and generatedAt cann
 
 Run the close self-test locally with: node scripts/collect-close.mjs --self-test
 
-To validate API access without changing latest_close.json, manually dispatch Collect market close bridge with test_mode=true. The run writes only status_close.json and auditable workflow evidence.
+The GitHub Actions manual run executes only the local self-tests. Use the local command above when an explicit live API check is needed; it does not commit or push generated files automatically.
 

@@ -44,11 +44,6 @@ const SPOT_SYMBOLS = [...CORE_SPOT, "00631L"];
 const OVERNIGHT_SYMBOLS = ["TSM", "SOX", "QQQ_NASDAQ", "NVDA", "MU", "USD_TWD", "VIX"];
 const STAGE_NOT_BEFORE = { "0000": "00:00:00", "0850": "08:50:00", "1030": "10:30:00" };
 const STAGE_NOT_AFTER = { "0000": "01:00:00", "0850": "08:59:59", "1030": "11:30:59" };
-const WORKFLOW_SCHEDULES = {
-  "0000": ["40 15 * * *", "50 15 * * *", "58 15 * * *", "6 16 * * *"],
-  "0850": ["45 0 * * 1-5", "50 0 * * 1-5", "55 0 * * 1-5"],
-  "1030": ["27 2 * * 1-5", "30 2 * * 1-5", "35 2 * * 1-5", "40 2 * * 1-5", "45 2 * * 1-5", "0 3 * * 1-5", "15 3 * * 1-5", "30 3 * * 1-5", "45 3 * * 1-5", "0 4 * * 1-5", "15 4 * * 1-5", "30 4 * * 1-5"],
-};
 const CLOCK_SKEW_TOLERANCE_SECONDS = 5;
 const MIDNIGHT_FRESH_SECONDS = 15 * 60;
 const MIDNIGHT_DELAYED_SECONDS = 30 * 60;
@@ -841,15 +836,16 @@ async function runSelfTest() {
   const assert = (condition, message) => {
     if (!condition) failures.push(message);
   };
-  const workflowText = await readFile(path.join(ROOT, ".github", "workflows", "collect-market.yml"), "utf8");
-  for (const [stage, schedules] of Object.entries(WORKFLOW_SCHEDULES)) {
-    for (const schedule of schedules) {
-      assert(workflowText.includes(`cron: "${schedule}"`), `workflow schedule missing for ${stage}: ${schedule}`);
-    }
-    const mapping = schedules.map((schedule) => `"${schedule}"`).join("|");
-    assert(workflowText.includes(`${mapping}) stage="${stage}"`), `workflow schedule mapping drifted for ${stage}`);
-  }
-  assert(workflowText.includes("--stage-window-guard --stage \"$STAGE\""), "workflow stage-window guard is not wired");
+  const workflowText = await readFile(path.join(ROOT, ".github", "workflows", "ci.yml"), "utf8");
+  assert(workflowText.includes("push:"), "CI workflow push trigger is missing");
+  assert(workflowText.includes("pull_request:"), "CI workflow pull_request trigger is missing");
+  assert(workflowText.includes("workflow_dispatch:"), "CI workflow manual trigger is missing");
+  assert(!/\bschedule\s*:/.test(workflowText), "CI workflow must not define a schedule trigger");
+  assert(!workflowText.includes("contents: write"), "CI workflow must not request contents write");
+  assert(!/\bgit\s+(add|commit|push)\b/.test(workflowText), "CI workflow must not commit or push data");
+  assert(!workflowText.includes("node scripts/collect-market.mjs --stage"), "CI workflow must not collect live market data");
+  assert(workflowText.includes("node scripts/collect-market.mjs --self-test"), "market self-test is not wired");
+  assert(workflowText.includes("node scripts/collect-close.mjs --self-test"), "close self-test is not wired");
   assert(stageWindowDetails("0000", "2026-08-15", new Date("2026-08-14T17:00:00.000Z")).state === "open", "00:00 stage window did not accept 01:00 boundary");
   assert(stageWindowDetails("0000", "2026-08-15", new Date("2026-08-15T00:36:00.000Z")).state === "expired", "00:00 stage window accepted delayed 08:36 run");
   assert(stageWindowDetails("0850", "2026-08-15", new Date("2026-08-15T00:59:59.000Z")).state === "open", "08:50 stage window rejected 08:59:59 boundary");
