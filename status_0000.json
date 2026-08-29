@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "stage": "0000",
   "status": "DEGRADED",
-  "generatedAt": "2026-08-29T18:53:45.053Z",
+  "generatedAt": "2026-08-29T19:09:36.602Z",
   "targetDate": "2026-08-30",
   "sourceSite": {
     "baseUrl": "https://tw-stock-dashboard.netlify.app",
@@ -13,37 +13,10 @@
     }
   },
   "marketHealth": {
-    "available": true,
-    "ok": true,
-    "status": "degraded",
-    "checkedAt": "2026-08-29T18:53:44.993Z",
-    "session": "closed",
-    "components": {
-      "marketData": {
-        "ok": true,
-        "httpStatus": 200,
-        "mode": "live",
-        "sourceAt": null,
-        "sampleCount": null,
-        "firstHourReady": null
-      },
-      "marketSnapshot": {
-        "ok": true,
-        "httpStatus": 200,
-        "mode": "live",
-        "sourceAt": null,
-        "sampleCount": null,
-        "firstHourReady": null
-      },
-      "intradaySampler": {
-        "ok": true,
-        "httpStatus": null,
-        "mode": null,
-        "sourceAt": "2026-08-28T05:30:12.574Z",
-        "sampleCount": 19,
-        "firstHourReady": true
-      }
-    }
+    "available": false,
+    "status": "unavailable",
+    "checkedAt": null,
+    "components": {}
   },
   "spot": {
     "2330": {
@@ -67,8 +40,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 134625,
-        "rawAgeSeconds": 134625,
+        "ageSeconds": 135577,
+        "rawAgeSeconds": 135577,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -95,8 +68,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 134625,
-        "rawAgeSeconds": 134625,
+        "ageSeconds": 135577,
+        "rawAgeSeconds": 135577,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -123,8 +96,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:33:00.000Z",
-        "ageSeconds": 134445,
-        "rawAgeSeconds": 134445,
+        "ageSeconds": 135397,
+        "rawAgeSeconds": 135397,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -151,8 +124,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T05:30:00.000Z",
-        "ageSeconds": 134625,
-        "rawAgeSeconds": 134625,
+        "ageSeconds": 135577,
+        "rawAgeSeconds": 135577,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -176,8 +149,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T20:00:02.000Z",
-        "ageSeconds": 82423,
-        "rawAgeSeconds": 82423,
+        "ageSeconds": 83375,
+        "rawAgeSeconds": 83375,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -199,8 +172,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T21:15:59.000Z",
-        "ageSeconds": 77866,
-        "rawAgeSeconds": 77866,
+        "ageSeconds": 78818,
+        "rawAgeSeconds": 78818,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -240,8 +213,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T20:00:00.000Z",
-        "ageSeconds": 82425,
-        "rawAgeSeconds": 82425,
+        "ageSeconds": 83377,
+        "rawAgeSeconds": 83377,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -263,8 +236,8 @@
       "freshness": {
         "status": "fresh",
         "sourceAt": "2026-08-28T20:00:01.000Z",
-        "ageSeconds": 82424,
-        "rawAgeSeconds": 82424,
+        "ageSeconds": 83376,
+        "rawAgeSeconds": 83376,
         "clockSkewClamped": false,
         "maxAgeSeconds": 129600,
         "basis": "sourceAt_or_updatedAt"
@@ -322,8 +295,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T20:59:58.000Z",
-        "ageSeconds": 78827,
-        "rawAgeSeconds": 78827,
+        "ageSeconds": 79779,
+        "rawAgeSeconds": 79779,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -348,8 +321,8 @@
       "freshness": {
         "status": "stale",
         "sourceAt": "2026-08-28T20:59:58.000Z",
-        "ageSeconds": 78827,
-        "rawAgeSeconds": 78827,
+        "ageSeconds": 79779,
+        "rawAgeSeconds": 79779,
         "clockSkewClamped": false,
         "maxAgeSeconds": 1800,
         "basis": "sourceAt_or_updatedAt"
@@ -384,30 +357,37 @@
   "missingRequired": [
     "stage.0000.expired_after_not_after"
   ],
-  "missingOptional": [],
-  "errors": [],
+  "missingOptional": [
+    "marketHealth"
+  ],
+  "errors": [
+    {
+      "source": "public_api",
+      "message": "health: fetch failed"
+    }
+  ],
   "collection": {
     "testMode": false,
     "latestUpdated": false,
-    "startedAt": "2026-08-29T18:53:37.011Z",
-    "evaluatedAt": "2026-08-29T18:53:45.053Z",
+    "startedAt": "2026-08-29T19:08:01.118Z",
+    "evaluatedAt": "2026-08-29T19:09:36.602Z",
     "stageWindow": {
       "timezone": "Asia/Taipei",
       "state": "expired",
       "notBefore": "2026-08-29T16:00:00.000Z",
       "notAfter": "2026-08-29T17:00:00.000Z",
-      "observedAt": "2026-08-29T18:53:37.011Z"
+      "observedAt": "2026-08-29T19:08:01.118Z"
     },
     "workflow": {
       "actions": true,
       "event": "schedule",
-      "schedule": "50 15 * * *",
-      "runId": "33269460495",
-      "sha": "25b32879204830076ea714ee7c47878d088c03a3",
+      "schedule": "58 15 * * *",
+      "runId": "33270067004",
+      "sha": "876885e3e00c51aa5d9eb7b23ebce33c03bb1899",
       "ref": "main"
     },
     "sourceSchemas": {
-      "health": "degraded",
+      "health": null,
       "marketData": "1.1",
       "snapshot": "1.1"
     }
